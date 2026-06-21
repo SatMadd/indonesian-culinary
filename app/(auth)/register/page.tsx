@@ -14,7 +14,8 @@ export default function RegisterPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
-  const supabase = createClient();
+
+  const isConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,9 +27,15 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!isConfigured) {
+      setErrorMsg('Supabase belum dikonfigurasi. Pastikan variabel lingkungan NEXT_PUBLIC_SUPABASE_URL dan NEXT_PUBLIC_SUPABASE_ANON_KEY telah diatur.');
+      return;
+    }
+
     setLoading(true);
 
     try {
+      const supabase = createClient();
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
