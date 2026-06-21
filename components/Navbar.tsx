@@ -4,8 +4,8 @@ import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import { Search, Plus, LogOut, Sun, Moon } from 'lucide-react';
-import { useTheme } from '@/components/ThemeProvider';
+import { Search, Plus, LogOut, Sun, Moon, Laptop } from 'lucide-react';
+import { useTheme, Theme } from '@/components/ThemeProvider';
 
 function SearchForm() {
   const router = useRouter();
@@ -43,7 +43,7 @@ export default function Navbar() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const supabase = createClient();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const getUser = async () => {
@@ -66,6 +66,24 @@ export default function Navbar() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.refresh();
+  };
+
+  const cycleTheme = () => {
+    if (theme === 'system') setTheme('light');
+    else if (theme === 'light') setTheme('dark');
+    else setTheme('system');
+  };
+
+  const renderThemeIcon = () => {
+    if (theme === 'light') return <Sun className="w-4.5 h-4.5" />;
+    if (theme === 'dark') return <Moon className="w-4.5 h-4.5" />;
+    return <Laptop className="w-4.5 h-4.5" />;
+  };
+
+  const getThemeTitle = () => {
+    if (theme === 'light') return 'Mode Terang (Klik untuk Gelap)';
+    if (theme === 'dark') return 'Mode Gelap (Klik untuk Sistem)';
+    return 'Mode Sistem (Klik untuk Terang)';
   };
 
   return (
@@ -91,12 +109,12 @@ export default function Navbar() {
       <div className="flex items-center gap-4">
         {/* Theme Toggle Switch */}
         <button
-          onClick={toggleTheme}
+          onClick={cycleTheme}
           className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-[#ff6b00] dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-zinc-900 rounded-full transition-all cursor-pointer"
-          title={theme === 'light' ? 'Mode Gelap' : 'Mode Terang'}
+          title={getThemeTitle()}
           aria-label="Toggle Theme"
         >
-          {theme === 'light' ? <Moon className="w-4.5 h-4.5" /> : <Sun className="w-4.5 h-4.5" />}
+          {renderThemeIcon()}
         </button>
 
         {user ? (

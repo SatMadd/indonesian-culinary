@@ -36,10 +36,18 @@ export default function RootLayout({
               (function() {
                 try {
                   var saved = localStorage.getItem('enaknyo_theme');
-                  if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  if (saved === 'dark' || (!saved && prefersDark)) {
                     document.documentElement.classList.add('dark');
-                  } else {
+                  } else if (saved === 'light') {
                     document.documentElement.classList.remove('dark');
+                  } else {
+                    // system or unconfigured
+                    if (prefersDark) {
+                      document.documentElement.classList.add('dark');
+                    } else {
+                      document.documentElement.classList.remove('dark');
+                    }
                   }
                 } catch (_) {}
               })();
