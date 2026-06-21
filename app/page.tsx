@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import Navbar from '@/components/Navbar';
@@ -21,9 +21,11 @@ function HomepageContent() {
 
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchRecipes = async () => {
       setLoading(true);
       try {
@@ -32,6 +34,8 @@ function HomepageContent() {
           .from('recipes_db')
           .select('*')
           .order('created_at', { ascending: false });
+
+        if (cancelled) return;
 
         // Load custom local recipes from localStorage
         const localRecipesStr = typeof window !== 'undefined' ? localStorage.getItem('enaknyo_local_recipes') : null;
@@ -47,17 +51,20 @@ function HomepageContent() {
           setRecipes([...localRecipes, ...data, ...uniqueFallbacks]);
         }
       } catch (err) {
+        if (cancelled) return;
         console.error('Error fetching recipes:', err);
         // Load custom local recipes from localStorage
         const localRecipesStr = typeof window !== 'undefined' ? localStorage.getItem('enaknyo_local_recipes') : null;
         const localRecipes: Recipe[] = localRecipesStr ? JSON.parse(localRecipesStr) : [];
         setRecipes([...localRecipes, ...FALLBACK_RECIPES]);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchRecipes();
+
+    return () => { cancelled = true; };
   }, [supabase]);
 
   // Apply filters client-side for immediate responsive feel
