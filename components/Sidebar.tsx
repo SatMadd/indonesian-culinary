@@ -58,7 +58,7 @@ export default function Sidebar() {
           .eq('user_id', currentUser.id);
 
         if (!favsError && userFavs && userFavs.length > 0) {
-          const favRecipeIds = userFavs.map((f: any) => f.recipe_id);
+          const favRecipeIds = userFavs.map((f: any) => Number(f.recipe_id));
           
           // Fetch the details of the favorited recipes from recipes_db
           const { data: dbRecipes, error: dbRecipesError } = await supabase

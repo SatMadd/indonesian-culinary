@@ -111,6 +111,7 @@ export default function WriteRecipePage() {
     setLoading(true);
 
     try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
       const finalSlug = `${slugify(title)}-${Math.floor(1000 + Math.random() * 9000)}`;
       const recipeData = {
         title: title.trim(),
@@ -125,12 +126,12 @@ export default function WriteRecipePage() {
         steps: steps.map((s) => s.trim()),
         is_popular: false,
         difficulty,
-        user_id: user?.id || null
+        user_id: currentUser?.id || null
       };
 
       // If user is authenticated, we write to Supabase recipes_db table.
       // If not, we will save to localStorage as a custom recipe, and redirect! This keeps the UI fully functional even for unauthenticated users checking the app out!
-      if (user) {
+      if (currentUser) {
         const { data, error } = await supabase
           .from('recipes_db')
           .insert([recipeData])
@@ -142,10 +143,10 @@ export default function WriteRecipePage() {
 
         // Auto-favorite the created recipe so it appears in "Koleksi Saya" in Sidebar
         if (data && data[0]) {
-          const newRecipeId = data[0].id;
+          const newRecipeId = Number(data[0].id);
           const { error: favError } = await supabase
             .from('favorites')
-            .insert([{ user_id: user.id, recipe_id: newRecipeId }]);
+            .insert([{ user_id: currentUser.id, recipe_id: newRecipeId }]);
             
           if (favError) {
             console.error('Failed to auto-favorite created recipe:', favError);

@@ -1,5 +1,5 @@
 export interface Recipe {
-  id?: string;
+  id?: string | number;
   created_at?: string;
   title: string;
   slug: string;
@@ -20,5 +20,5 @@ export interface Favorite {
   id?: string;
   created_at?: string;
   user_id: string;
-  recipe_id: string;
+  recipe_id: number;
 }

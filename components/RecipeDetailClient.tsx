@@ -64,7 +64,7 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
             .from('favorites')
             .select('id')
             .eq('user_id', user.id)
-            .eq('recipe_id', recipeId)
+            .eq('recipe_id', Number(recipeId))
             .maybeSingle();
           if (!error && data) {
             setIsFavorited(true);
@@ -113,7 +113,7 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
             .from('favorites')
             .delete()
             .eq('user_id', user.id)
-            .eq('recipe_id', recipeId);
+            .eq('recipe_id', Number(recipeId));
             
           if (!error) {
             setIsFavorited(false);
@@ -135,7 +135,7 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
           if (existingRecipe) {
             recipeId = existingRecipe.id;
           } else {
-            // Seed the fallback recipe to database so it has a UUID id
+            // Seed the fallback recipe to database so it has a bigint id
             const { id, created_at, ...recipeData } = recipe;
             const { data: newRecipe, error: insertError } = await supabase
               .from('recipes_db')
@@ -154,7 +154,7 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
         if (recipeId) {
           const { error } = await supabase
             .from('favorites')
-            .insert([{ user_id: user.id, recipe_id: recipeId }]);
+            .insert([{ user_id: user.id, recipe_id: Number(recipeId) }]);
             
           if (!error) {
             setIsFavorited(true);
