@@ -139,6 +139,22 @@ export default function WriteRecipePage() {
         if (error) {
           throw new Error(error.message);
         }
+
+        // Auto-favorite the created recipe so it appears in "Koleksi Saya" in Sidebar
+        if (data && data[0]) {
+          const newRecipeId = data[0].id;
+          const { error: favError } = await supabase
+            .from('favorites')
+            .insert([{ user_id: user.id, recipe_id: newRecipeId }]);
+            
+          if (favError) {
+            console.error('Failed to auto-favorite created recipe:', favError);
+          } else {
+            // Dispatch a custom event to notify Sidebar
+            window.dispatchEvent(new Event('favorites-updated'));
+          }
+        }
+
         setSuccessMsg('Resep berhasil dipublikasikan!');
         setTimeout(() => {
           router.push(`/recipes/${finalSlug}`);

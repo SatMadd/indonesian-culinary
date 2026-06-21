@@ -44,12 +44,20 @@ export default function RegisterPage() {
       if (error) {
         setErrorMsg(error.message);
       } else {
-        setSuccessMsg(
-          'Pendaftaran berhasil! Silakan periksa email Anda untuk mengonfirmasi pendaftaran Anda sebelum masuk.'
-        );
-        setEmail('');
-        setPassword('');
-        setConfirmPassword('');
+        if (data?.session) {
+          setSuccessMsg('Pendaftaran berhasil! Mengarahkan...');
+          setTimeout(() => {
+            router.push('/');
+            router.refresh();
+          }, 1500);
+        } else {
+          setSuccessMsg(
+            'Pendaftaran berhasil! Silakan periksa email Anda untuk mengonfirmasi pendaftaran Anda sebelum masuk.'
+          );
+          setEmail('');
+          setPassword('');
+          setConfirmPassword('');
+        }
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Terjadi kesalahan sistem.');

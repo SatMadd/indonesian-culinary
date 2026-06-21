@@ -47,24 +47,36 @@ export default function Sidebar() {
   }, [supabase]);
 
   const loadFavorites = async (currentUser: any) => {
-    // 1. Get from localStorage
-    const localFavSlugs = JSON.parse(localStorage.getItem('enaknyo_favorites') || '[]');
-    let favRecipes = FALLBACK_RECIPES.filter(r => localFavSlugs.includes(r.slug));
+    let favRecipes: Recipe[] = [];
 
-    // 2. Try fetching from Supabase if logged in
     if (currentUser) {
       try {
-        const { data: userFavs, error } = await supabase
-          .from('favorites_db')
-          .select('recipe_id');
+        // Fetch favorites matching the user's ID
+        const { data: userFavs, error: favsError } = await supabase
+          .from('favorites')
+          .select('recipe_id')
+          .eq('user_id', currentUser.id);
 
-        if (!error && userFavs && userFavs.length > 0) {
-          // If we had database favorites, merge/use them. For now, since we have localStorage,
-          // we use localStorage as source of truth or merge it.
+        if (!favsError && userFavs && userFavs.length > 0) {
+          const favRecipeIds = userFavs.map((f: any) => f.recipe_id);
+          
+          // Fetch the details of the favorited recipes from recipes_db
+          const { data: dbRecipes, error: dbRecipesError } = await supabase
+            .from('recipes_db')
+            .select('*')
+            .in('id', favRecipeIds);
+
+          if (!dbRecipesError && dbRecipes) {
+            favRecipes = dbRecipes;
+          }
         }
       } catch (e) {
         console.error('Failed to load DB favorites:', e);
       }
+    } else {
+      // Guest mode - load from localStorage using slug
+      const localFavSlugs = JSON.parse(localStorage.getItem('enaknyo_favorites') || '[]');
+      favRecipes = FALLBACK_RECIPES.filter(r => localFavSlugs.includes(r.slug));
     }
 
     setFavorites(favRecipes);

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { createClient } from '@/utils/supabase/client';
 import { Heart, Clock, BarChart } from 'lucide-react';
 import { Recipe } from '@/types';
 
@@ -12,30 +13,145 @@ interface RecipeCardProps {
 
 export default function RecipeCard({ recipe }: RecipeCardProps) {
   const [isFavorited, setIsFavorited] = useState(false);
+  const supabase = createClient();
 
   useEffect(() => {
-    const favorites = JSON.parse(localStorage.getItem('enaknyo_favorites') || '[]');
-    setIsFavorited(favorites.includes(recipe.slug));
-  }, [recipe.slug]);
+    const checkFavoriteStatus = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Authenticated user check
+        let recipeId = recipe.id;
+        if (!recipeId) {
+          // Fallback recipe (no id in hardcoded data) - check db by slug
+          const { data: dbRecipe } = await supabase
+            .from('recipes_db')
+            .select('id')
+            .eq('slug', recipe.slug)
+            .maybeSingle();
+          recipeId = dbRecipe?.id;
+        }
 
-  const toggleFavorite = (e: React.MouseEvent) => {
+        if (recipeId) {
+          const { data, error } = await supabase
+            .from('favorites')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('recipe_id', recipeId)
+            .maybeSingle();
+          if (!error && data) {
+            setIsFavorited(true);
+            return;
+          }
+        }
+        setIsFavorited(false);
+      } else {
+        // Guest mode check
+        const favorites = JSON.parse(localStorage.getItem('enaknyo_favorites') || '[]');
+        setIsFavorited(favorites.includes(recipe.slug));
+      }
+    };
+
+    checkFavoriteStatus();
+
+    // Listen for global updates (e.g. from Sidebar or recipe page)
+    const handleFavUpdate = () => {
+      checkFavoriteStatus();
+    };
+    window.addEventListener('favorites-updated', handleFavUpdate);
+    return () => {
+      window.removeEventListener('favorites-updated', handleFavUpdate);
+    };
+  }, [recipe, supabase]);
+
+  const toggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    const favorites = JSON.parse(localStorage.getItem('enaknyo_favorites') || '[]');
-    let updatedFavorites;
-    
-    if (favorites.includes(recipe.slug)) {
-      updatedFavorites = favorites.filter((slug: string) => slug !== recipe.slug);
-      setIsFavorited(false);
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
+      // Authenticated database toggle
+      if (isFavorited) {
+        let recipeId = recipe.id;
+        if (!recipeId) {
+          const { data: dbRecipe } = await supabase
+            .from('recipes_db')
+            .select('id')
+            .eq('slug', recipe.slug)
+            .maybeSingle();
+          recipeId = dbRecipe?.id;
+        }
+
+        if (recipeId) {
+          const { error } = await supabase
+            .from('favorites')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('recipe_id', recipeId);
+            
+          if (!error) {
+            setIsFavorited(false);
+          } else {
+            console.error('Error removing favorite:', error);
+          }
+        }
+      } else {
+        // Insert into favorites
+        let recipeId = recipe.id;
+        if (!recipeId) {
+          // If the recipe is a fallback recipe, search for existing in db first
+          const { data: existingRecipe } = await supabase
+            .from('recipes_db')
+            .select('id')
+            .eq('slug', recipe.slug)
+            .maybeSingle();
+            
+          if (existingRecipe) {
+            recipeId = existingRecipe.id;
+          } else {
+            // Seed the fallback recipe to database so it has a UUID id
+            const { id, created_at, ...recipeData } = recipe;
+            const { data: newRecipe, error: insertError } = await supabase
+              .from('recipes_db')
+              .insert([recipeData])
+              .select('id')
+              .single();
+              
+            if (!insertError && newRecipe) {
+              recipeId = newRecipe.id;
+            } else {
+              console.error('Failed to seed fallback recipe to DB:', insertError);
+            }
+          }
+        }
+
+        if (recipeId) {
+          const { error } = await supabase
+            .from('favorites')
+            .insert([{ user_id: user.id, recipe_id: recipeId }]);
+            
+          if (!error) {
+            setIsFavorited(true);
+          } else {
+            console.error('Error saving favorite:', error);
+          }
+        }
+      }
     } else {
-      updatedFavorites = [...favorites, recipe.slug];
-      setIsFavorited(true);
+      // Guest mode (localStorage)
+      const favorites = JSON.parse(localStorage.getItem('enaknyo_favorites') || '[]');
+      let updatedFavorites;
+      if (favorites.includes(recipe.slug)) {
+        updatedFavorites = favorites.filter((slug: string) => slug !== recipe.slug);
+        setIsFavorited(false);
+      } else {
+        updatedFavorites = [...favorites, recipe.slug];
+        setIsFavorited(true);
+      }
+      localStorage.setItem('enaknyo_favorites', JSON.stringify(updatedFavorites));
     }
-    
-    localStorage.setItem('enaknyo_favorites', JSON.stringify(updatedFavorites));
-    
-    // Dispatch a custom event to notify Sidebar of updates
+
+    // Dispatch a custom event to notify other components of updates
     window.dispatchEvent(new Event('favorites-updated'));
   };
 
