@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
@@ -14,25 +14,29 @@ export default function Sidebar() {
   const [favorites, setFavorites] = useState<Recipe[]>([]);
   const supabase = createClient();
 
+  const userRef = useRef<any>(null);
+  userRef.current = user;
+
   useEffect(() => {
     const checkUserAndFavs = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      loadFavorites(user);
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      setUser(currentUser);
+      loadFavorites(currentUser);
     };
 
     checkUserAndFavs();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        setUser(session?.user ?? null);
-        loadFavorites(session?.user ?? null);
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        loadFavorites(currentUser);
       }
     );
 
     // Watch for localStorage favorites updates (custom event)
     const handleFavChange = () => {
-      loadFavorites(user);
+      loadFavorites(userRef.current);
     };
     window.addEventListener('favorites-updated', handleFavChange);
 
@@ -40,7 +44,7 @@ export default function Sidebar() {
       subscription.unsubscribe();
       window.removeEventListener('favorites-updated', handleFavChange);
     };
-  }, [supabase, user]);
+  }, [supabase]);
 
   const loadFavorites = async (currentUser: any) => {
     // 1. Get from localStorage
