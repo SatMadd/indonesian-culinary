@@ -27,7 +27,7 @@ export default function Sidebar() {
     checkUserAndFavs();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (_event: any, session: any) => {
         const currentUser = session?.user ?? null;
         setUser(currentUser);
         loadFavorites(currentUser);
