@@ -83,34 +83,34 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-[56px] bottom-0 z-40 w-[175px] border-r border-zinc-100 bg-white p-4 hidden md:flex flex-col gap-4 overflow-y-auto">
+    <aside className="fixed left-0 top-[56px] bottom-0 z-40 w-[175px] border-r border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-4 hidden md:flex flex-col gap-4 overflow-y-auto transition-colors">
       {/* Top Item */}
       <Link
         href="/"
-        className="flex items-center justify-between text-zinc-800 hover:text-[#ff6b00] transition-colors group"
+        className="flex items-center justify-between text-zinc-800 dark:text-zinc-200 hover:text-[#ff6b00] dark:hover:text-orange-400 transition-colors group"
       >
         <div className="flex items-center gap-2">
-          <BookMarked className="w-4 h-4 text-zinc-500 group-hover:text-[#ff6b00]" />
+          <BookMarked className="w-4 h-4 text-zinc-500 dark:text-zinc-400 group-hover:text-[#ff6b00] dark:group-hover:text-orange-400" />
           <span className="text-xs font-semibold uppercase tracking-wider">
             Menu Utama
           </span>
         </div>
-        <ChevronRight className="w-4 h-4 text-zinc-300 group-hover:text-[#ff6b00] transition-transform group-hover:translate-x-0.5" />
+        <ChevronRight className="w-4 h-4 text-zinc-300 dark:text-zinc-700 group-hover:text-[#ff6b00] dark:group-hover:text-orange-400 transition-transform group-hover:translate-x-0.5" />
       </Link>
 
-      <div className="h-[1px] bg-zinc-100 my-1" />
+      <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800 my-1" />
 
       {/* Collection Section */}
       {!user ? (
         /* Unauthenticated Card */
-        <div className="rounded-xl border border-orange-100 bg-orange-50/40 p-3 flex flex-col gap-2 shadow-sm shadow-orange-500/5 hover:border-orange-200 transition-colors">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-[#ff6b00]">
+        <div className="rounded-xl border border-orange-100 dark:border-orange-950 bg-orange-50/40 dark:bg-orange-950/10 p-3 flex flex-col gap-2 shadow-sm shadow-orange-500/5 hover:border-orange-200 dark:hover:border-orange-900 transition-colors">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-[#ff6b00] dark:text-orange-400">
             <Heart className="w-3.5 h-3.5 fill-current" />
             <span>Koleksi Resep</span>
           </div>
-          <p className="text-[11px] leading-relaxed text-zinc-500">
+          <p className="text-[11px] leading-relaxed text-zinc-500 dark:text-zinc-400">
             Untuk mulai membuat koleksi resep, silakan{' '}
-            <Link href="/login" className="text-[#ff6b00] font-bold hover:underline">
+            <Link href="/login" className="text-[#ff6b00] dark:text-orange-400 font-bold hover:underline">
               daftar atau masuk.
             </Link>
           </p>
@@ -118,13 +118,13 @@ export default function Sidebar() {
       ) : (
         /* Authenticated List */
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-[#ff6b00]">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-[#ff6b00] dark:text-orange-400">
             <Heart className="w-3.5 h-3.5 fill-current" />
             <span>Koleksi Saya ({favorites.length})</span>
           </div>
 
           {favorites.length === 0 ? (
-            <p className="text-[11px] leading-relaxed text-zinc-400 italic">
+            <p className="text-[11px] leading-relaxed text-zinc-400 dark:text-zinc-500 italic">
               Belum ada resep yang disimpan. Klik ikon hati pada resep untuk menyimpan!
             </p>
           ) : (
@@ -133,12 +133,12 @@ export default function Sidebar() {
                 <Link
                   key={recipe.slug}
                   href={`/recipes/${recipe.slug}`}
-                  className="group flex flex-col gap-0.5 p-1.5 rounded-lg hover:bg-zinc-50 text-[11px] font-medium text-zinc-600 hover:text-zinc-900 transition-all border border-transparent hover:border-zinc-100"
+                  className="group flex flex-col gap-0.5 p-1.5 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-900 text-[11px] font-medium text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all border border-transparent hover:border-zinc-100 dark:hover:border-zinc-800"
                 >
-                  <span className="truncate block font-semibold text-zinc-700 group-hover:text-[#ff6b00]">
+                  <span className="truncate block font-semibold text-zinc-700 dark:text-zinc-300 group-hover:text-[#ff6b00] dark:group-hover:text-orange-400">
                     {recipe.title}
                   </span>
-                  <span className="text-[9px] text-zinc-400 font-normal">
+                  <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-normal">
                     {recipe.region}
                   </span>
                 </Link>
@@ -149,12 +149,12 @@ export default function Sidebar() {
       )}
 
       {/* Extra decor block */}
-      <div className="mt-auto rounded-xl border border-purple-100 bg-purple-50/20 p-3 flex flex-col gap-1.5">
-        <div className="flex items-center gap-1 text-[10px] font-bold text-purple-600">
+      <div className="mt-auto rounded-xl border border-purple-100 dark:border-purple-950 bg-purple-50/20 dark:bg-purple-950/5 p-3 flex flex-col gap-1.5">
+        <div className="flex items-center gap-1 text-[10px] font-bold text-purple-600 dark:text-purple-400">
           <Sparkles className="w-3 h-3 fill-current" />
           <span>Rasa Nusantara</span>
         </div>
-        <p className="text-[9px] leading-relaxed text-zinc-400">
+        <p className="text-[9px] leading-relaxed text-zinc-400 dark:text-zinc-500">
           Jelajahi dan lestarikan warisan kuliner Indonesia!
         </p>
       </div>

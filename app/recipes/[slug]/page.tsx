@@ -70,7 +70,7 @@ export default async function RecipePage({ params }: PageProps) {
   const recipe = await getRecipe(slug);
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans flex flex-col">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans flex flex-col transition-colors">
       {/* Top Navbar */}
       <Navbar />
 
@@ -80,7 +80,7 @@ export default async function RecipePage({ params }: PageProps) {
         <Sidebar />
 
         {/* Page Content */}
-        <main className="flex-1 min-w-0 md:pl-[175px] px-6 md:px-8 bg-zinc-50/50">
+        <main className="flex-1 min-w-0 md:pl-[175px] px-6 md:px-8 bg-zinc-50/50 dark:bg-zinc-950/50">
           <RecipeDetailClient recipe={recipe} slug={slug} />
         </main>
       </div>

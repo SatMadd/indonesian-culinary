@@ -158,7 +158,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
   return (
     <Link
       href={`/recipes/${recipe.slug}`}
-      className="group relative block w-full h-[150px] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 border border-zinc-100 transition-all duration-300 bg-zinc-100 cursor-pointer"
+      className="group relative block w-full h-[150px] rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 border border-zinc-100 dark:border-zinc-800/80 transition-all duration-300 bg-zinc-100 dark:bg-zinc-900 cursor-pointer"
     >
       {/* Background Image */}
       <Image
@@ -192,7 +192,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
 
       {/* Bottom Content */}
       <div className="absolute bottom-3 left-3 right-3 z-20 flex flex-col gap-1">
-        <h3 className="text-sm font-extrabold text-white leading-snug tracking-tight truncate drop-shadow-sm group-hover:text-orange-300 transition-colors">
+        <h3 className="text-sm font-extrabold text-white leading-snug tracking-tight truncate drop-shadow-sm group-hover:text-orange-300 dark:group-hover:text-orange-400 transition-colors">
           {recipe.title}
         </h3>
 
