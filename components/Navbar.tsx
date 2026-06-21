@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { Search, Plus, LogOut, Sun, Moon, Laptop } from 'lucide-react';
-import { useTheme, Theme } from '@/components/ThemeProvider';
+import { useTheme } from 'next-themes';
 
 function SearchForm() {
   const router = useRouter();
@@ -44,8 +44,10 @@ export default function Navbar() {
   const [user, setUser] = useState<any>(null);
   const supabase = createClient();
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
@@ -75,6 +77,7 @@ export default function Navbar() {
   };
 
   const renderThemeIcon = () => {
+    if (!mounted) return <Laptop className="w-4.5 h-4.5 opacity-0" />;
     if (theme === 'light') return <Sun className="w-4.5 h-4.5" />;
     if (theme === 'dark') return <Moon className="w-4.5 h-4.5" />;
     return <Laptop className="w-4.5 h-4.5" />;
