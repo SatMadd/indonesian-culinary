@@ -93,8 +93,10 @@ function HomepageContent() {
     if (selectedCategory) {
       const category = selectedCategory.toLowerCase();
       
-      // Regions
-      if (['jawa', 'padang', 'sunda', 'betawi'].includes(category)) {
+      const nonRegionCategories = ['kue', 'lauk pauk', 'sayuran', 'seafood'];
+      
+      // Regions (if not a non-region category, treat as a region filter)
+      if (!nonRegionCategories.includes(category)) {
         if (recipe.region.toLowerCase() !== category) return false;
       } 
       // Main categories

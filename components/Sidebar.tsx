@@ -12,6 +12,7 @@ export default function Sidebar() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [favorites, setFavorites] = useState<Recipe[]>([]);
+  const [hasError, setHasError] = useState(false);
   const supabase = createClient();
 
   const userRef = useRef<any>(null);
@@ -48,6 +49,7 @@ export default function Sidebar() {
 
   const loadFavorites = async (currentUser: any) => {
     let favRecipes: Recipe[] = [];
+    setHasError(false);
 
     if (currentUser) {
       try {
@@ -57,7 +59,13 @@ export default function Sidebar() {
           .select('recipe_id')
           .eq('user_id', currentUser.id);
 
-        if (!favsError && userFavs && userFavs.length > 0) {
+        if (favsError) {
+          console.error('Failed to load DB favorites:', favsError);
+          setHasError(true);
+          return;
+        }
+
+        if (userFavs && userFavs.length > 0) {
           const favRecipeIds = userFavs.map((f: any) => Number(f.recipe_id));
           
           // Fetch the details of the favorited recipes from recipes_db
@@ -66,17 +74,27 @@ export default function Sidebar() {
             .select('*')
             .in('id', favRecipeIds);
 
-          if (!dbRecipesError && dbRecipes) {
+          if (dbRecipesError) {
+            console.error('Failed to load DB recipes:', dbRecipesError);
+            setHasError(true);
+            return;
+          }
+
+          if (dbRecipes) {
             favRecipes = dbRecipes;
           }
         }
       } catch (e) {
         console.error('Failed to load DB favorites:', e);
+        setHasError(true);
       }
     } else {
       // Guest mode - load from localStorage using slug
       const localFavSlugs = JSON.parse(localStorage.getItem('enaknyo_favorites') || '[]');
-      favRecipes = FALLBACK_RECIPES.filter(r => localFavSlugs.includes(r.slug));
+      const localRecipesStr = typeof window !== 'undefined' ? localStorage.getItem('enaknyo_local_recipes') : null;
+      const localRecipes: Recipe[] = localRecipesStr ? JSON.parse(localRecipesStr) : [];
+      const allRecipes = [...localRecipes, ...FALLBACK_RECIPES];
+      favRecipes = allRecipes.filter(r => localFavSlugs.includes(r.slug));
     }
 
     setFavorites(favRecipes);
@@ -123,7 +141,11 @@ export default function Sidebar() {
             <span>Koleksi Saya ({favorites.length})</span>
           </div>
 
-          {favorites.length === 0 ? (
+          {hasError ? (
+            <p className="text-[11px] leading-relaxed text-red-500 font-semibold italic">
+              Gagal memuat koleksi
+            </p>
+          ) : favorites.length === 0 ? (
             <p className="text-[11px] leading-relaxed text-zinc-400 dark:text-zinc-500 italic">
               Belum ada resep yang disimpan. Klik ikon hati pada resep untuk menyimpan!
             </p>

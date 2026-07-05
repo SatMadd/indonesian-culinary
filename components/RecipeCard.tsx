@@ -13,6 +13,7 @@ interface RecipeCardProps {
 
 export default function RecipeCard({ recipe }: RecipeCardProps) {
   const [isFavorited, setIsFavorited] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const supabase = createClient();
 
   useEffect(() => {
@@ -66,6 +67,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
   const toggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setErrorMsg('');
 
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -93,6 +95,8 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
             setIsFavorited(false);
           } else {
             console.error('Error removing favorite:', error);
+            setErrorMsg('Gagal menghapus');
+            setTimeout(() => setErrorMsg(''), 3000);
           }
         }
       } else {
@@ -121,6 +125,9 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
               recipeId = newRecipe.id;
             } else {
               console.error('Failed to seed fallback recipe to DB:', insertError);
+              setErrorMsg('Gagal menyimpan');
+              setTimeout(() => setErrorMsg(''), 3000);
+              return;
             }
           }
         }
@@ -134,6 +141,8 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
             setIsFavorited(true);
           } else {
             console.error('Error saving favorite:', error);
+            setErrorMsg('Gagal menyimpan');
+            setTimeout(() => setErrorMsg(''), 3000);
           }
         }
       }
@@ -190,6 +199,12 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
         />
       </button>
 
+      {errorMsg && (
+        <span className="absolute top-2.5 right-11 z-30 bg-red-650 text-white text-[9px] font-bold px-2 py-0.5 rounded shadow-md animate-pulse">
+          {errorMsg}
+        </span>
+      )}
+
       {/* Bottom Content */}
       <div className="absolute bottom-3 left-3 right-3 z-20 flex flex-col gap-1">
         <h3 className="text-sm font-extrabold text-white leading-snug tracking-tight truncate drop-shadow-sm group-hover:text-orange-300 dark:group-hover:text-orange-400 transition-colors">
@@ -200,7 +215,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
         <div className="flex items-center gap-3 text-[10px] text-zinc-300 font-medium">
           <span className="flex items-center gap-1">
             <Clock className="w-3 h-3 text-orange-400" />
-            <span>{recipe.prep_time + recipe.cook_time} mnt</span>
+            <span>{(recipe.prep_time || 0) + (recipe.cook_time || 0)} mnt</span>
           </span>
           <span className="flex items-center gap-1">
             <BarChart className="w-3 h-3 text-orange-400" />

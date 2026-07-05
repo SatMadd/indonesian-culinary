@@ -26,6 +26,7 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
   const [recipe, setRecipe] = useState<Recipe | null>(initialRecipe);
   const [loadingLocal, setLoadingLocal] = useState(!initialRecipe);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const [checkedIngredients, setCheckedIngredients] = useState<number[]>([]);
   const [activeStep, setActiveStep] = useState<number>(-1);
   const supabase = createClient();
@@ -92,6 +93,7 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
 
   const toggleFavorite = async () => {
     if (!recipe) return;
+    setErrorMsg('');
 
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -119,6 +121,8 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
             setIsFavorited(false);
           } else {
             console.error('Error removing favorite:', error);
+            setErrorMsg('Gagal menghapus');
+            setTimeout(() => setErrorMsg(''), 3000);
           }
         }
       } else {
@@ -147,6 +151,9 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
               recipeId = newRecipe.id;
             } else {
               console.error('Failed to seed fallback recipe to DB:', insertError);
+              setErrorMsg('Gagal menyimpan');
+              setTimeout(() => setErrorMsg(''), 3000);
+              return;
             }
           }
         }
@@ -160,6 +167,8 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
             setIsFavorited(true);
           } else {
             console.error('Error saving favorite:', error);
+            setErrorMsg('Gagal menyimpan');
+            setTimeout(() => setErrorMsg(''), 3000);
           }
         }
       }
@@ -250,17 +259,20 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
               <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
                 Informasi Resep
               </span>
-              <button
-                onClick={toggleFavorite}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/20 hover:bg-orange-100 dark:hover:bg-orange-900 text-[#ff6b00] dark:text-orange-400 text-xs font-bold transition-all active:scale-[0.97] cursor-pointer"
-              >
-                <Heart
-                  className={`w-3.5 h-3.5 transition-colors ${
-                    isFavorited ? 'fill-red-500 text-red-500' : 'text-[#ff6b00] dark:text-orange-400'
-                  }`}
-                />
-                <span>{isFavorited ? 'Tersimpan' : 'Simpan'}</span>
-              </button>
+              <div className="flex items-center gap-2">
+                {errorMsg && <span className="text-[10px] text-red-500 font-bold animate-pulse">{errorMsg}</span>}
+                <button
+                  onClick={toggleFavorite}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/20 hover:bg-orange-100 dark:hover:bg-orange-900 text-[#ff6b00] dark:text-orange-400 text-xs font-bold transition-all active:scale-[0.97] cursor-pointer"
+                >
+                  <Heart
+                    className={`w-3.5 h-3.5 transition-colors ${
+                      isFavorited ? 'fill-red-500 text-red-500' : 'text-[#ff6b00] dark:text-orange-400'
+                    }`}
+                  />
+                  <span>{isFavorited ? 'Tersimpan' : 'Simpan'}</span>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -331,7 +343,7 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
               Klik bahan yang sudah Anda siapkan untuk mencentangnya.
             </p>
             <div className="flex flex-col gap-2 mt-1">
-              {recipe.ingredients.map((ingredient, idx) => {
+              {(recipe.ingredients || []).map((ingredient, idx) => {
                 const isChecked = checkedIngredients.includes(idx);
                 return (
                   <button
@@ -368,7 +380,7 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
               Langkah Pembuatan
             </h2>
             <div className="flex flex-col gap-4 mt-2">
-              {recipe.steps.map((step, idx) => {
+              {(recipe.steps || []).map((step, idx) => {
                 const isDone = activeStep > idx;
                 const isActive = activeStep === idx;
                 return (

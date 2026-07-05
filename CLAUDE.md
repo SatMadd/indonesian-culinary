@@ -52,7 +52,7 @@ Build a full-featured recipe website with:
 | `prep_time`         | integer   | Minutes |
 | `cook_time`         | integer   | Minutes |
 | `servings`          | integer   | Number of people |
-| `ingredients`       | jsonb     | Array of objects |
+| `ingredients`       | jsonb     | Array of strings |
 | `steps`             | jsonb     | Array of strings |
 | `is_popular`        | boolean   | For popular section |
 | `difficulty`        | text      | "mudah", "sedang", "sulit" |
