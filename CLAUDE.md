@@ -142,3 +142,102 @@ When working on this project, always refer to this CLAUDE.md for context. Update
 
 ---
 Last updated: June 2026
+
+# Enaknyo — Project Guide for Agents
+
+## Stack
+- Next.js (App Router — `app/` folder, not `pages/`)
+- Supabase (Postgres + Auth), client created via `@/utils/supabase/client`
+  (browser) and `@/utils/supabase/server` (server components)
+- Tailwind CSS
+- Deployed on Vercel
+
+## Database schema — source of truth
+
+The database is the source of truth, not this file. If anything below
+looks wrong, check the live schema via Supabase's Table Editor or a
+scratch script before trusting this doc — schemas drift and docs get
+stale (this happened once already: this file used to describe
+`ingredients` as a jsonb array of objects when the real column had been
+migrated to a plain string array).
+
+### `recipes_db`
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `int8` (identity) | Primary key |
+| `created_at` | `timestamptz` | |
+| `title` | `text` | |
+| `slug` | `text` | Must be unique; used as the route param in `app/recipes/[slug]` |
+| `description` | `text` | Non-null, empty string `""` if no description (never `null`) |
+| `image_url` | `text` | Full URL. Next.js `next.config.ts` must whitelist any new image host under `images.remotePatterns` or `<Image>` will silently fail to render |
+| `region` | `text` | Non-null, empty string `""` if unknown (never `null`). Free text — NOT limited to a fixed enum. Any filtering logic must handle arbitrary region strings, not just a hardcoded shortlist |
+| `prep_time` | `int4` | Non-null, defaults to `0` |
+| `cook_time` | `int4` | Non-null, defaults to `0` |
+| `servings` | `int2` | |
+| `ingredients` | `jsonb`, but always stores a **flat array of strings** — e.g. `["1 ekor ayam kampung, potong kecil-kecil", "2 sdt garam"]`. NOT an array of `{amount, unit, name}` objects. Match this exactly in the `Recipe` TypeScript type (`ingredients: string[]`) |
+| `steps` | `jsonb`, flat array of strings (one per instruction step) |
+| `is_popular` | `bool` | |
+| `difficulty` | `text`, but constrained by convention (not a DB enum) to lowercase `'mudah' \| 'sedang' \| 'sulit'` — always lowercase when writing, never title-case |
+| `user_id` | `uuid`, nullable, FK to `auth.users.id` | Null for recipes with no specific owner (e.g. bulk-imported ones) |
+
+### `favorites`
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `uuid` | |
+| `user_id` | `uuid`, FK to `auth.users.id` | |
+| `recipe_id` | `int8`, FK to `recipes_db.id` | Cast with `Number(...)` when comparing — the ID is a plain integer, not a UUID |
+| `created_at` | `timestamptz` | |
+
+## Data flow conventions
+
+- **Guest vs. authenticated users**: guests use `localStorage` for
+  favorites (`enaknyo_favorites`, an array of recipe slugs) and custom
+  recipes (`enaknyo_local_recipes`, an array of `Recipe` objects).
+  Authenticated users use the `favorites` and `recipes_db` Supabase
+  tables. Any component reading favorites/custom-recipes must check
+  BOTH sources and combine them where relevant (this was a real bug —
+  see `components/Sidebar.tsx` history) rather than assuming one path.
+- **Favorite toggle must be optimistic-safe, not optimistic-blind**:
+  never flip the UI's favorited state before confirming the Supabase
+  write succeeded. On failure, keep the prior state and surface a brief
+  inline error, don't fail silently to the console only.
+- **Fallback recipes**: `lib/data/recipes.ts` exports `FALLBACK_RECIPES`,
+  a hardcoded array shown when the Supabase fetch fails or returns
+  empty, or blended in when its slugs aren't already in the DB. If a
+  guest favorites a fallback recipe, it gets seeded into `recipes_db`
+  on the fly so it can have a real `id` for the `favorites` FK. Any
+  future work here should move this to an upsert (`onConflict: 'slug'`)
+  to avoid duplicate-row races if it becomes a code path anyone touches.
+- **Region filtering**: never hardcode a shortlist of regions (e.g. just
+  Jawa/Padang/Sunda/Betawi) to check against — the actual data has many
+  more region values (and many recipes have no region at all, `""`).
+  Filter generically: if a category value isn't one of the known
+  non-region categories (`kue`, `lauk pauk`, `sayuran`, `seafood`),
+  treat it as a region match against `recipe.region`.
+- **Difficulty**: always compare/store lowercase. The `Recipe` type
+  constrains this to `'mudah' | 'sedang' | 'sulit'` — validate/normalize
+  any user-submitted or scraped value against this before writing.
+
+## Known non-obvious gotchas
+
+- Next.js `<Image>` requires every external image hostname to be listed
+  in `next.config.ts`'s `images.remotePatterns`, or it fails silently
+  (renders a broken image, no console error visible to end users).
+  When adding any new recipe image source, check this file first.
+- `recipes_db.ingredients` and `.steps` are `jsonb` columns but the
+  actual JSON stored is always a flat string array — don't assume
+  object shape from the column type alone.
+- Scraped/imported recipes may have `region: ""` for the majority of
+  rows — this is expected, not a bug, since the source data doesn't tag
+  by Indonesian province. UI should handle an empty region gracefully
+  (e.g. simply not render a region badge) rather than showing "null" or
+  a broken empty tag.
+
+## Design system
+
+See `design.md` for the full visual design system (colors, type,
+component conventions). Keep logic changes and visual changes separate:
+if a design task seems to require changing data-fetching, filtering, or
+state logic, stop and flag it rather than doing both in one pass.
+
+Last updated: July 7, 2026

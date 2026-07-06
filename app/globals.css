@@ -3,37 +3,54 @@
 @variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #fafafa;
-  --foreground: #18181b;
-  --card: #ffffff;
-  --border: #f4f4f5;
-  --input: #ffffff;
-  --text-muted: #71717a;
+  --background: #FAF8F3;
+  --foreground: #1C1B19;
+  --bg: #FAF8F3;
+  --surface: #FFFFFF;
+  --surface-muted: #F1EFE6;
+  --border: #E8E3D8;
+  --ink: #1C1B19;
+  --ink-muted: #5C5A52;
+  --primary: #3F6B4F;
+  --secondary: #C08A2E;
+  --accent: #8B3A2F;
 }
 
 .dark {
-  --background: #09090b;
-  --foreground: #f4f4f5;
-  --card: #18181b;
-  --border: #27272a;
-  --input: #18181b;
-  --text-muted: #a1a1aa;
+  --background: #17160F;
+  --foreground: #F3F0E6;
+  --bg: #17160F;
+  --surface: #1F1E1A;
+  --surface-muted: #232219;
+  --border: #33322C;
+  --ink: #F3F0E6;
+  --ink-muted: #B4B2A9;
+  --primary: #6FA47D;
+  --secondary: #E0AA4E;
+  --accent: #C25646;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
+  --color-background: var(--bg);
+  --color-foreground: var(--ink);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
   --color-border: var(--border);
-  --color-input: var(--input);
-  --color-text-muted: var(--text-muted);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'Fraunces', serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--ink);
   font-family: var(--font-sans), sans-serif;
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }

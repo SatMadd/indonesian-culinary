@@ -147,7 +147,7 @@ export default function WriteRecipePage() {
           const { error: favError } = await supabase
             .from('favorites')
             .insert([{ user_id: currentUser.id, recipe_id: newRecipeId }]);
-            
+
           if (favError) {
             console.error('Failed to auto-favorite created recipe:', favError);
           } else {
@@ -185,43 +185,46 @@ export default function WriteRecipePage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans flex flex-col transition-colors">
+    <div className="min-h-screen bg-bg font-sans flex flex-col transition-colors">
       <Navbar />
 
       <div className="flex flex-1 pt-[56px]">
         <Sidebar />
 
-        <main className="flex-1 min-w-0 md:pl-[175px] px-6 md:px-8 bg-zinc-50/50 dark:bg-zinc-950/50">
+        <main className="flex-1 min-w-0 md:pl-[175px] px-6 md:px-8 bg-bg">
           <div className="w-full max-w-3xl mx-auto py-6 flex flex-col gap-6">
             {/* Back Arrow */}
             <Link
               href="/"
-              className="flex items-center gap-1.5 text-sm font-semibold text-zinc-500 dark:text-zinc-400 hover:text-[#ff6b00] dark:hover:text-orange-400 transition-colors self-start"
+              className="flex items-center gap-1.5 text-sm font-semibold text-ink-muted hover:text-primary transition-colors self-start"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Kembali ke Beranda</span>
             </Link>
 
             {/* Main Editor Card */}
-            <div className="bg-white dark:bg-zinc-900 p-6 md:p-8 rounded-3xl border border-zinc-100 dark:border-zinc-800 shadow-sm flex flex-col gap-6 transition-colors">
-              <div className="flex flex-col gap-1.5 pb-4 border-b border-zinc-100 dark:border-zinc-800">
-                <h1 className="text-2xl font-black text-zinc-900 dark:text-zinc-100 leading-tight">
+            <div className="bg-surface p-6 md:p-8 rounded-2xl border border-border flex flex-col gap-6 transition-colors">
+              <div className="flex flex-col gap-1.5 pb-4 border-b border-border">
+                <h1
+                  className="text-2xl font-semibold text-ink leading-tight"
+                  style={{ fontFamily: "'Fraunces', serif" }}
+                >
                   Tulis Resep Baru
                 </h1>
-                <p className="text-xs text-zinc-400 dark:text-zinc-500">
+                <p className="text-xs text-ink-muted">
                   Bagikan warisan kuliner Anda dengan ribuan pencinta rasa Nusantara.
                 </p>
               </div>
 
               {/* Warnings/Success */}
               {!user && !checkingAuth && (
-                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/60 text-amber-800 dark:text-amber-400 text-xs font-semibold leading-relaxed flex items-start gap-2.5">
-                  <Lock className="w-4 h-4 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
+                <div className="p-4 rounded-xl bg-surface-muted border border-border text-ink-muted text-xs font-semibold leading-relaxed flex items-start gap-2.5">
+                  <Lock className="w-4 h-4 text-secondary flex-shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-bold">Mode Pengunjung (Belum Masuk)</span>
-                    <p className="font-medium text-amber-700/90 dark:text-amber-400/90 mt-0.5">
+                    <span className="font-bold text-ink">Mode Pengunjung (Belum Masuk)</span>
+                    <p className="font-medium text-ink-muted mt-0.5">
                       Anda belum masuk. Resep yang Anda buat akan disimpan secara lokal di browser Anda. Untuk membagikannya ke database publik, silakan{' '}
-                      <Link href="/login" className="text-[#ff6b00] dark:text-orange-400 font-bold hover:underline">
+                      <Link href="/login" className="text-primary font-bold hover:underline">
                         masuk atau daftar.
                       </Link>
                     </p>
@@ -230,13 +233,13 @@ export default function WriteRecipePage() {
               )}
 
               {errorMsg && (
-                <div className="p-3.5 rounded-2xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/60 text-red-600 dark:text-red-400 text-xs font-semibold">
+                <div className="p-3.5 rounded-xl bg-surface-muted border border-accent/30 text-accent text-xs font-semibold">
                   {errorMsg}
                 </div>
               )}
               {successMsg && (
-                <div className="p-3.5 rounded-2xl bg-green-50 dark:bg-green-950/20 border border-green-100 dark:border-green-900/60 text-green-600 dark:text-green-400 text-xs font-semibold flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500 dark:text-green-400" />
+                <div className="p-3.5 rounded-xl bg-surface-muted border border-primary/30 text-primary text-xs font-semibold flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4" />
                   <span>{successMsg}</span>
                 </div>
               )}
@@ -244,40 +247,40 @@ export default function WriteRecipePage() {
               <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                 {/* Section 1: Basic info */}
                 <div className="flex flex-col gap-4">
-                  <h2 className="text-sm font-extrabold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-[#ff6b00] dark:text-orange-400" />
+                  <h2 className="text-sm font-extrabold text-ink uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-secondary" />
                     1. Informasi Utama
                   </h2>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Judul Resep</label>
+                    <label className="text-xs font-bold text-ink-muted">Judul Resep</label>
                     <input
                       type="text"
                       required
                       placeholder="Contoh: Soto Betawi Asli Daging Sapi"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      className="w-full h-11 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 text-sm focus:outline-none focus:border-[#ff6b00] dark:focus:border-orange-500 bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200"
+                      className="w-full h-11 px-4 rounded-xl border border-border text-sm focus:outline-none focus:border-primary bg-bg text-ink"
                     />
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Deskripsi Singkat</label>
+                    <label className="text-xs font-bold text-ink-muted">Deskripsi Singkat</label>
                     <textarea
                       placeholder="Ceritakan sejarah singkat atau cita rasa resep buatan Anda..."
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      className="w-full h-24 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 text-sm focus:outline-none focus:border-[#ff6b00] dark:focus:border-orange-500 bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200 resize-none"
+                      className="w-full h-24 p-4 rounded-xl border border-border text-sm focus:outline-none focus:border-primary bg-bg text-ink resize-none"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Asal Wilayah</label>
+                      <label className="text-xs font-bold text-ink-muted">Asal Wilayah</label>
                       <select
                         value={region}
                         onChange={(e) => setRegion(e.target.value)}
-                        className="w-full h-11 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 text-sm focus:outline-none focus:border-[#ff6b00] dark:focus:border-orange-500 text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-950"
+                        className="w-full h-11 px-4 rounded-xl border border-border text-sm focus:outline-none focus:border-primary text-ink bg-bg"
                       >
                         <option value="Jawa">Jawa</option>
                         <option value="Padang">Padang</option>
@@ -292,11 +295,11 @@ export default function WriteRecipePage() {
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Tingkat Kesulitan</label>
+                      <label className="text-xs font-bold text-ink-muted">Tingkat Kesulitan</label>
                       <select
                         value={difficulty}
                         onChange={(e) => setDifficulty(e.target.value as any)}
-                        className="w-full h-11 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 text-sm focus:outline-none focus:border-[#ff6b00] dark:focus:border-orange-500 text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-950"
+                        className="w-full h-11 px-4 rounded-xl border border-border text-sm focus:outline-none focus:border-primary text-ink bg-bg"
                       >
                         <option value="mudah">Mudah (Cocok untuk Pemula)</option>
                         <option value="sedang">Sedang</option>
@@ -307,36 +310,36 @@ export default function WriteRecipePage() {
 
                   <div className="grid grid-cols-3 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Persiapan (Mnt)</label>
+                      <label className="text-xs font-bold text-ink-muted">Persiapan (Mnt)</label>
                       <input
                         type="number"
                         min="1"
                         required
                         value={prepTime}
                         onChange={(e) => setPrepTime(Number(e.target.value))}
-                        className="w-full h-11 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 text-sm focus:outline-none focus:border-[#ff6b00] dark:focus:border-orange-500 bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200"
+                        className="w-full h-11 px-4 rounded-xl border border-border text-sm focus:outline-none focus:border-primary bg-bg text-ink font-mono"
                       />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Masak (Mnt)</label>
+                      <label className="text-xs font-bold text-ink-muted">Masak (Mnt)</label>
                       <input
                         type="number"
                         min="1"
                         required
                         value={cookTime}
                         onChange={(e) => setCookTime(Number(e.target.value))}
-                        className="w-full h-11 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 text-sm focus:outline-none focus:border-[#ff6b00] dark:focus:border-orange-500 bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200"
+                        className="w-full h-11 px-4 rounded-xl border border-border text-sm focus:outline-none focus:border-primary bg-bg text-ink font-mono"
                       />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Porsi (Orang)</label>
+                      <label className="text-xs font-bold text-ink-muted">Porsi (Orang)</label>
                       <input
                         type="number"
                         min="1"
                         required
                         value={servings}
                         onChange={(e) => setServings(Number(e.target.value))}
-                        className="w-full h-11 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 text-sm focus:outline-none focus:border-[#ff6b00] dark:focus:border-orange-500 bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200"
+                        className="w-full h-11 px-4 rounded-xl border border-border text-sm focus:outline-none focus:border-primary bg-bg text-ink font-mono"
                       />
                     </div>
                   </div>
@@ -344,22 +347,21 @@ export default function WriteRecipePage() {
 
                 {/* Section 2: Photo selection */}
                 <div className="flex flex-col gap-3">
-                  <h2 className="text-sm font-extrabold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
-                    <ImageIcon className="w-4 h-4 text-[#ff6b00] dark:text-orange-400" />
+                  <h2 className="text-sm font-extrabold text-ink uppercase tracking-wider flex items-center gap-1.5">
+                    <ImageIcon className="w-4 h-4 text-secondary" />
                     2. Foto Kuliner
                   </h2>
 
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Pilih Preset Gambar atau Masukkan URL Sendiri</label>
+                    <label className="text-xs font-bold text-ink-muted">Pilih Preset Gambar atau Masukkan URL Sendiri</label>
                     <div className="grid grid-cols-4 gap-3">
                       {presetImages.map((img) => (
                         <button
                           key={img.name}
                           type="button"
                           onClick={() => setImageUrl(img.url)}
-                          className={`h-14 rounded-xl overflow-hidden border-2 text-[9px] font-bold relative group flex items-end justify-center pb-1 text-white bg-zinc-800 transition-all cursor-pointer ${
-                            imageUrl === img.url ? 'border-[#ff6b00] ring-2 ring-orange-500/20' : 'border-transparent opacity-80'
-                          }`}
+                          className={`h-14 rounded-xl overflow-hidden border-2 text-[9px] font-bold relative group flex items-end justify-center pb-1 text-white bg-surface-muted transition-all cursor-pointer ${imageUrl === img.url ? 'border-primary ring-2 ring-primary/20' : 'border-transparent opacity-80'
+                            }`}
                         >
                           <img src={img.url} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform" />
                           <div className="absolute inset-0 bg-black/40" />
@@ -373,15 +375,15 @@ export default function WriteRecipePage() {
                       placeholder="Masukkan URL foto kuliner kustom Anda..."
                       value={imageUrl}
                       onChange={(e) => setImageUrl(e.target.value)}
-                      className="w-full h-11 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs mt-2 focus:outline-none focus:border-[#ff6b00] dark:focus:border-orange-500 bg-white dark:bg-zinc-950 text-zinc-700 dark:text-zinc-300"
+                      className="w-full h-11 px-4 rounded-xl border border-border text-xs mt-2 focus:outline-none focus:border-primary bg-bg text-ink"
                     />
                   </div>
                 </div>
 
                 {/* Section 3: Ingredients */}
                 <div className="flex flex-col gap-3">
-                  <h2 className="text-sm font-extrabold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
-                    <span className="w-1.5 h-4 rounded-full bg-[#ff6b00] dark:bg-orange-500" />
+                  <h2 className="text-sm font-extrabold text-ink uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-1.5 h-4 rounded-full bg-primary" />
                     3. Bahan-Bahan
                   </h2>
 
@@ -393,13 +395,13 @@ export default function WriteRecipePage() {
                           placeholder={`Bahan ke-${idx + 1} (contoh: 2 siung bawang putih, memarkan)`}
                           value={ingredient}
                           onChange={(e) => handleIngredientChange(idx, e.target.value)}
-                          className="flex-1 h-11 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 text-sm focus:outline-none focus:border-[#ff6b00] dark:focus:border-orange-500 bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200"
+                          className="flex-1 h-11 px-4 rounded-xl border border-border text-sm focus:outline-none focus:border-primary bg-bg text-ink"
                         />
                         <button
                           type="button"
                           onClick={() => removeIngredient(idx)}
                           disabled={ingredients.length === 1}
-                          className="p-3 hover:text-red-500 text-zinc-400 dark:text-zinc-500 disabled:opacity-40 transition-colors cursor-pointer"
+                          className="p-3 hover:text-accent text-ink-muted disabled:opacity-40 transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -410,7 +412,7 @@ export default function WriteRecipePage() {
                   <button
                     type="button"
                     onClick={addIngredient}
-                    className="flex items-center gap-1 text-xs font-bold text-[#ff6b00] dark:text-orange-400 hover:text-orange-600 transition-colors mt-1 self-start cursor-pointer"
+                    className="flex items-center gap-1 text-xs font-bold text-primary hover:text-primary/80 transition-colors mt-1 self-start cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Tambah Bahan</span>
@@ -419,28 +421,28 @@ export default function WriteRecipePage() {
 
                 {/* Section 4: Steps */}
                 <div className="flex flex-col gap-3">
-                  <h2 className="text-sm font-extrabold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider flex items-center gap-1.5">
-                    <span className="w-1.5 h-4 rounded-full bg-[#ff6b00] dark:bg-orange-500" />
+                  <h2 className="text-sm font-extrabold text-ink uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-1.5 h-4 rounded-full bg-primary" />
                     4. Langkah Pembuatan
                   </h2>
 
                   <div className="flex flex-col gap-2">
                     {steps.map((step, idx) => (
                       <div key={idx} className="flex items-start gap-2">
-                        <span className="w-6 h-11 flex items-center justify-center text-xs font-bold text-zinc-400 dark:text-zinc-550">
+                        <span className="w-6 h-11 flex items-center justify-center text-xs font-bold text-ink-muted font-mono">
                           {idx + 1}
                         </span>
                         <textarea
                           placeholder={`Deskripsikan langkah ke-${idx + 1}...`}
                           value={step}
                           onChange={(e) => handleStepChange(idx, e.target.value)}
-                          className="flex-1 min-h-[44px] max-h-24 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 text-sm focus:outline-none focus:border-[#ff6b00] dark:focus:border-orange-500 bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200 resize-y"
+                          className="flex-1 min-h-[44px] max-h-24 p-3 rounded-xl border border-border text-sm focus:outline-none focus:border-primary bg-bg text-ink resize-y"
                         />
                         <button
                           type="button"
                           onClick={() => removeStep(idx)}
                           disabled={steps.length === 1}
-                          className="p-3 hover:text-red-500 text-zinc-400 dark:text-zinc-550 disabled:opacity-40 transition-colors mt-0.5 cursor-pointer"
+                          className="p-3 hover:text-accent text-ink-muted disabled:opacity-40 transition-colors mt-0.5 cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -451,19 +453,19 @@ export default function WriteRecipePage() {
                   <button
                     type="button"
                     onClick={addStep}
-                    className="flex items-center gap-1 text-xs font-bold text-[#ff6b00] dark:text-orange-400 hover:text-orange-600 transition-colors mt-1 self-start cursor-pointer"
+                    className="flex items-center gap-1 text-xs font-bold text-primary hover:text-primary/80 transition-colors mt-1 self-start cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Tambah Langkah</span>
                   </button>
                 </div>
 
-                <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800" />
+                <div className="h-[1px] bg-border" />
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-12 rounded-xl bg-[#ff6b00] hover:bg-orange-600 disabled:bg-zinc-300 text-white font-bold text-sm shadow-md shadow-orange-500/10 transition-all active:scale-[0.98] cursor-pointer"
+                  className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 disabled:bg-surface-muted disabled:text-ink-muted text-white font-bold text-sm transition-all active:scale-[0.98] cursor-pointer"
                 >
                   {loading ? 'Menyimpan...' : 'Terbitkan Resep'}
                 </button>

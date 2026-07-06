@@ -27,13 +27,13 @@ function SearchForm() {
 
   return (
     <form onSubmit={handleSearchSubmit} className="relative w-full">
-      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 dark:text-zinc-500" />
+      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" />
       <input
         type="text"
         placeholder="Cari resep, bahan, wilayah..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full h-9 pl-10 pr-4 rounded-full border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 text-sm placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-[#ff6b00] dark:focus:border-[#ff6b00] focus:bg-white dark:focus:bg-zinc-900 transition-all text-zinc-800 dark:text-zinc-100"
+        className="w-full h-9 pl-10 pr-4 rounded-xl border border-border bg-bg text-sm placeholder-ink-muted focus:outline-none focus:border-primary focus:bg-surface transition-all text-ink"
       />
     </form>
   );
@@ -90,30 +90,33 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 h-[56px] border-b border-zinc-100 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md px-6 flex items-center justify-between transition-colors">
+    <nav className="fixed top-0 left-0 right-0 z-50 h-[56px] border-b border-border bg-surface/80 backdrop-blur-md px-6 flex items-center justify-between transition-colors">
       {/* Left - Logo */}
       <Link href="/" className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-[#ff6b00] flex items-center justify-center text-white font-bold text-lg shadow-md shadow-orange-500/20">
+        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-lg">
           E
         </div>
-        <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-[#ff6b00] to-orange-500 bg-clip-text text-transparent">
+        <span
+          className="font-semibold text-xl tracking-tight text-ink"
+          style={{ fontFamily: "'Fraunces', serif" }}
+        >
           Enaknyo
         </span>
       </Link>
 
       {/* Center - Search Box wrapped in Suspense */}
       <div className="hidden md:block w-[500px]">
-        <Suspense fallback={<div className="w-full h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 animate-pulse" />}>
+        <Suspense fallback={<div className="w-full h-9 rounded-xl bg-surface-muted border border-border animate-pulse" />}>
           <SearchForm />
         </Suspense>
       </div>
 
       {/* Right - Navigation */}
       <div className="flex items-center gap-4">
-        {/* Theme Toggle Switch */}
+        {/* Theme Toggle */}
         <button
           onClick={cycleTheme}
-          className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-[#ff6b00] dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-zinc-900 rounded-full transition-all cursor-pointer"
+          className="p-2 text-ink-muted hover:text-primary hover:bg-surface-muted rounded-xl transition-all cursor-pointer"
           title={getThemeTitle()}
           aria-label="Toggle Theme"
         >
@@ -122,12 +125,12 @@ export default function Navbar() {
 
         {user ? (
           <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300 hidden sm:inline">
+            <span className="text-sm font-medium text-ink-muted hidden sm:inline">
               Halo, {user.email?.split('@')[0]}
             </span>
             <button
               onClick={handleLogout}
-              className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-[#ff6b00] dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-zinc-900 rounded-full transition-all cursor-pointer"
+              className="p-2 text-ink-muted hover:text-primary hover:bg-surface-muted rounded-xl transition-all cursor-pointer"
               title="Keluar"
             >
               <LogOut className="w-4 h-4" />
@@ -137,13 +140,13 @@ export default function Navbar() {
           <div className="flex items-center gap-3 text-sm">
             <Link
               href="/login"
-              className="text-zinc-600 dark:text-zinc-300 hover:text-[#ff6b00] dark:hover:text-orange-400 font-medium transition-colors"
+              className="text-ink-muted hover:text-primary font-medium transition-colors"
             >
               Masuk
             </Link>
             <Link
               href="/register"
-              className="px-3 py-1.5 rounded-full border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-200 hover:border-[#ff6b00] dark:hover:border-orange-500 hover:text-[#ff6b00] dark:hover:text-orange-400 font-medium transition-all"
+              className="px-3 py-1.5 rounded-xl border border-border text-ink hover:border-primary hover:text-primary font-medium transition-all"
             >
               Daftar
             </Link>
@@ -152,7 +155,7 @@ export default function Navbar() {
 
         <Link
           href="/write"
-          className="flex items-center gap-1.5 px-4 h-9 rounded-full bg-[#ff6b00] hover:bg-orange-600 text-white text-sm font-semibold shadow-md shadow-orange-500/10 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          className="flex items-center gap-1.5 px-4 h-9 rounded-xl bg-primary hover:bg-primary/90 text-white text-sm font-semibold transition-all active:scale-[0.98]"
         >
           <Plus className="w-4 h-4" />
           <span>Tulis Resep</span>

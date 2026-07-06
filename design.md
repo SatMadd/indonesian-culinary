@@ -1,287 +1,93 @@
-# Enaknyo Homepage Design Specification
-
-## Overview
-A recipe discovery homepage with a left sidebar, top navigation bar, hero banner, popular search cards, and category buttons.
-
-## Canvas
-- Desktop layout
-- Approx screenshot size: 1892 × 1042 px
-- Background: very light gray (#f3f3f3 to #f5f5f5)
-
----
-
-# Layout Structure
-
-## 1. Left Sidebar
-Fixed vertical sidebar on the left.
-
-### Dimensions
-- Width: ~175px
-- Full viewport height
-- Background: white
-
-### Top Item
-- Icon + text: "Koleksi Resep"
-- Chevron/right arrow on the far right
-
-### Collection Card
-Located below menu item.
-
-Card:
-- Light beige background
-- Rounded corners (~12px)
-- Thin beige border
-
-Content:
-- Small orange icon
-- Title: **Koleksi Resep**
-- Description:
-  "Untuk mulai membuat koleksi resep, silakan"
-- CTA text:
-  **daftar atau masuk.**
-  - Orange
-  - Bold
-
----
-
-## 2. Top Navigation Bar
-
-Height: ~56px
-
-### Left
-Logo area:
-- Orange rounded-square icon
-- Brand name: **Enaknyo**
-- Orange brand color
-
-### Center
-Search box:
-- Large rounded input
-- Placeholder:
-  "Cari resep, bahan, pengguna"
-- Search icon on left
-- Light gray border
-- Width ~500px
-
-### Right Navigation
-Text links:
-- Masuk
-- Daftar
-
-Primary button:
-- Orange background
-- Rounded corners
-- Label:
-  "+ Tulis Resep"
-
----
-
-## 3. Hero Section
-
-Large orange banner.
-
-### Dimensions
-- Full content width
-- Height ~280px
-
-### Background
-- Bright orange (#ff6a00 range)
-- Repeating subtle "+" pattern throughout
-
-### Content Alignment
-Horizontally centered.
-
-### Headline
-"Aneka Resep Masakan Indonesia"
-
-Style:
-- White
-- Bold
-- Large (~56px equivalent)
-
-### Subtitle
-"Temukan ribuan resep masakan nusantara yang lezat dan mudah dibuat"
-
-Style:
-- White
-- Smaller size
-- Medium weight
-
-### Hero Image
-Position:
-- Right side of banner
-
-Style:
-- Rounded corners (~16px)
-- Food preparation photograph
-- Approx 270×210px
-
----
-
-# Main Content
-
-Centered content container.
-
-Approx max width:
-1100–1200px
-
----
-
-## 4. Popular Searches Section
-
-### Header Row
-Left:
-- Title:
-  "Pencarian Populer"
-
-Style:
-- Dark navy text
-- Bold
-- Large heading
-
-Right:
-- Link:
-  "Lihat Semua"
-- Orange text
-
-### Recipe Card Grid
-
-Grid:
-- 4 columns
-- 2 rows
-- Gap ~18px
-
-Card style:
-- Rounded corners
-- Image fills entire card
-- Dark gradient overlay at bottom
-- White title text
-
-Cards displayed:
-
-Row 1:
-1. Soto Ayam
-2. Ayam Kecap
-3. Rendang
-4. Udang Asam Manis
-
-Row 2:
-5. Nasi Goreng Spesial
-6. Sambal Terasi
-7. Gado-Gado
-8. Sate Ayam
-
-Card size:
-~240 × 130px
-
----
-
-## 5. Category Section
-
-### Section Title
-"Kategori Pilihan"
-
-Style:
-- Dark navy
-- Bold
-- Large
-
-### Category Grid
-
-Grid:
-- 4 columns
-- 2 rows
-- Large gaps
-- Rounded buttons/cards
-
-Button height:
-~56px
-
-Text:
-- Center aligned
-- White
-- Bold
-
-Categories and Colors:
-
-Row 1:
-- Masakan Jawa → Red gradient
-- Masakan Padang → Orange gradient
-- Masakan Sunda → Green
-- Masakan Betawi → Blue
-
-Row 2:
-- Kue & Jajanan → Pink gradient
-- Lauk Pauk → Purple gradient
-- Sayuran → Green/teal
-- Seafood → Cyan/teal
-
-Border radius:
-~14px
-
-Subtle shadow:
-0 4px 12px rgba(0,0,0,0.08)
-
----
-
-# Typography
-
-Primary font:
-- Inter
-- Poppins
-- Or similar modern sans-serif
-
-Heading color:
-#15233b
-
-Body color:
-#555
-
-White text:
-#ffffff
-
----
-
-# Color Palette
-
-Primary Orange:
-#ff6b00
-
-Dark Navy:
-#15233b
-
-Light Background:
-#f4f4f4
-
-White:
-#ffffff
-
-Red:
-#ff1744
-
-Green:
-#08c441
-
-Blue:
-#2f6df6
-
-Purple:
-#9c3cff
-
-Pink:
-#ef1696
-
-Teal:
-#11b5d6
-
----
-
-# Visual Style
-
-- Clean modern recipe portal
-- Large rounded corners
-- Soft shadows
-- Bright accent colors
-- Spacious layout
-- Card-based content presentation
-- Strong orange branding throughout
+# Enaknyo — Design System
+
+## Grounding
+
+Enaknyo's audience is home cooks looking for a specific Indonesian dish,
+fast. The design's job is: help them find a dish, trust it's good, and
+cook it — not browse a food magazine. Every visual decision should serve
+that, not decorate it.
+
+Direction: **clean & minimal**, grounded in actual Indonesian kitchen
+materials (turmeric, banana leaf, palm sugar) rather than a generic
+cream-and-terracotta "AI food blog" look. Restraint over decoration —
+one or two accent colors used consistently beats eight different
+gradients on eight category pills.
+
+## Color tokens
+
+Use these exact hex values as Tailwind arbitrary values (`bg-[#FAF8F3]`)
+or promote them into `tailwind.config` under `theme.extend.colors` if
+that's cleaner for the agent to maintain — either is fine, just don't
+invent new colors outside this list.
+
+| Token | Light mode | Dark mode | Use |
+|---|---|---|---|
+| `bg` | `#FAF8F3` | `#17160F` | Page background |
+| `surface` | `#FFFFFF` | `#1F1E1A` | Cards, panels, inputs |
+| `surface-muted` | `#F1EFE6` | `#232219` | Skeleton loaders, subtle fills |
+| `border` | `#E8E3D8` | `#33322C` | All borders/dividers |
+| `ink` | `#1C1B19` | `#F3F0E6` | Primary text |
+| `ink-muted` | `#5C5A52` | `#B4B2A9` | Secondary text, descriptions |
+| `primary` (banana-leaf green) | `#3F6B4F` | `#6FA47D` | Primary actions, active states, links |
+| `secondary` (turmeric gold) | `#C08A2E` | `#E0AA4E` | Badges, highlights, icons |
+| `accent` (chili red) | `#8B3A2F` | `#C25646` | Favorites/hearts, errors, spicy indicators only — not decorative |
+
+Do not use orange (`#ff6b00` or similar) anywhere — that's the old brand
+color being replaced. Do not introduce gradients on category pills,
+buttons, or badges; use flat fills with the tokens above.
+
+## Typography
+
+- **Display/headings** (`h1`, hero titles, page titles): Fraunces serif,
+  weight 500–600. Apply via inline `style={{ fontFamily: "'Fraunces', serif" }}`
+  or a Tailwind `font-display` utility if one is set up in the config —
+  check `tailwind.config` first before adding a duplicate font stack.
+- **Body/UI text** (everything else — buttons, labels, card titles, nav):
+  the existing default sans stack (`font-sans` / system UI). Don't apply
+  the serif to small text; it hurts legibility below ~16px.
+- **Numeric/metadata** (cook time, servings, difficulty, prep time): 'JetBrains Mono',
+  monospace. This is a deliberate signature — numbers should read like
+  precise recipe measurements, not just decorative text.
+
+Both fonts need `<link>` tags in `app/layout.tsx`'s `<head>`:
+```
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+```
+Check if these are already present before adding duplicates.
+
+## Component conventions
+
+- **Corners**: `rounded-xl` (cards, pills, inputs) or `rounded-2xl` (larger
+  containers like the hero or empty states). Avoid `rounded-3xl` or
+  fully pill-shaped buttons except where already established (category
+  pills can stay pill-shaped if that's the existing pattern — check
+  before changing shape, this doc governs color/type, not layout
+  overhauls unless explicitly asked).
+- **Borders over shadows**: prefer a 1px `border` token over drop
+  shadows for card separation. Only use a subtle shadow on true overlays
+  (modals, dropdowns), never on inline cards.
+- **Hover states**: border color shifts to `primary`, not a shadow lift
+  or scale transform, to keep the "restrained" feel. Existing
+  `hover:-translate-y-0.5` type effects should be removed in favor of
+  `hover:border-[primary]`.
+- **Badges** (region, category, difficulty tags): flat fill using
+  `secondary` (gold) as the default badge color, `accent` (chili) only
+  for anything favorite/spicy-related, `primary` (green) for active/
+  selected states. Never more than these three on one badge type.
+- **Icons**: keep using `lucide-react` (already in the project) — recolor
+  to match tokens above, don't switch icon libraries.
+
+## What NOT to do
+
+- Don't add new gradients anywhere.
+- Don't reintroduce orange.
+- Don't apply the serif display font to body copy, buttons, or anything
+  under ~16px.
+- Don't invent new colors outside the token table — if something doesn't
+  fit, ask rather than picking an arbitrary hex.
+- Don't change component logic, state, or data-fetching while doing
+  visual work — see `CLAUDE.md` for the boundary between design changes
+  and logic changes. If a visual change seems to require a logic change,
+  stop and flag it rather than doing both at once.

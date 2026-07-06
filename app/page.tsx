@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
@@ -132,14 +133,14 @@ function HomepageContent() {
   });
 
   const categoriesList = [
-    { name: 'Masakan Jawa', value: 'jawa', color: 'from-red-500 to-rose-600 shadow-red-500/20' },
-    { name: 'Masakan Padang', value: 'padang', color: 'from-orange-500 to-amber-600 shadow-orange-500/20' },
-    { name: 'Masakan Sunda', value: 'sunda', color: 'from-green-500 to-emerald-600 shadow-green-500/20' },
-    { name: 'Masakan Betawi', value: 'betawi', color: 'from-blue-500 to-indigo-600 shadow-blue-500/20' },
-    { name: 'Kue & Jajanan', value: 'kue', color: 'from-pink-500 to-purple-600 shadow-pink-500/20' },
-    { name: 'Lauk Pauk', value: 'lauk pauk', color: 'from-purple-600 to-violet-700 shadow-purple-500/20' },
-    { name: 'Sayuran', value: 'sayuran', color: 'from-teal-500 to-emerald-600 shadow-teal-500/20' },
-    { name: 'Seafood', value: 'seafood', color: 'from-cyan-500 to-teal-600 shadow-cyan-500/20' }
+    { name: 'Masakan Jawa', value: 'jawa' },
+    { name: 'Masakan Padang', value: 'padang' },
+    { name: 'Masakan Sunda', value: 'sunda' },
+    { name: 'Masakan Betawi', value: 'betawi' },
+    { name: 'Kue & Jajanan', value: 'kue' },
+    { name: 'Lauk Pauk', value: 'lauk pauk' },
+    { name: 'Sayuran', value: 'sayuran' },
+    { name: 'Seafood', value: 'seafood' }
   ];
 
   return (
@@ -157,8 +158,8 @@ function HomepageContent() {
       {/* Category List Section */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-[#ff6b00] dark:text-orange-400" />
-          <h2 className="text-lg font-extrabold text-[#15233b] dark:text-zinc-100 tracking-tight">
+          <Sparkles className="w-5 h-5 text-secondary" />
+          <h2 className="text-lg font-medium font-display text-ink dark:text-ink tracking-tight">
             Kategori Pilihan
           </h2>
         </div>
@@ -167,16 +168,17 @@ function HomepageContent() {
           {categoriesList.map((cat) => {
             const isActive = selectedCategory.toLowerCase() === cat.value.toLowerCase();
             return (
-              <a
+              <Link
                 key={cat.name}
                 href={isActive ? '/' : `/?category=${encodeURIComponent(cat.value)}`}
-                className={`relative flex items-center justify-center h-14 rounded-2xl text-xs font-bold text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer bg-gradient-to-r overflow-hidden ${cat.color} ${
-                  isActive ? 'ring-4 ring-orange-500 dark:ring-orange-400 ring-offset-2 dark:ring-offset-zinc-950' : ''
+                className={`flex items-center justify-center h-14 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer border ${
+                  isActive
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-surface hover:border-primary border-border text-ink'
                 }`}
               >
-                <div className="absolute inset-0 bg-black/10 hover:bg-black/0 transition-colors" />
-                <span className="relative z-10">{cat.name}</span>
-              </a>
+                <span>{cat.name}</span>
+              </Link>
             );
           })}
         </div>
@@ -186,21 +188,21 @@ function HomepageContent() {
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ChefHat className="w-5 h-5 text-[#ff6b00] dark:text-orange-400" />
-            <h2 className="text-lg font-extrabold text-[#15233b] dark:text-zinc-100 tracking-tight">
+            <ChefHat className="w-5 h-5 text-secondary" />
+            <h2 className="text-lg font-medium font-display text-ink dark:text-ink tracking-tight">
               {searchQuery || selectedRegion || selectedDifficulty || selectedCategory
                 ? 'Hasil Pencarian'
                 : 'Pencarian Populer'}
             </h2>
           </div>
           {(searchQuery || selectedRegion || selectedDifficulty || selectedCategory) && (
-            <a
+            <Link
               href="/"
-              className="text-xs font-bold text-[#ff6b00] dark:text-orange-400 hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
             >
               <span>Lihat Semua</span>
               <ArrowRight className="w-3.5 h-3.5" />
-            </a>
+            </Link>
           )}
         </div>
 
@@ -209,21 +211,21 @@ function HomepageContent() {
             {[...Array(8)].map((_, i) => (
               <div
                 key={i}
-                className="w-full h-[150px] rounded-2xl bg-zinc-200 dark:bg-zinc-800 animate-pulse border border-zinc-100 dark:border-zinc-800"
+                className="w-full h-[150px] rounded-xl bg-surface-muted animate-pulse border border-border"
               />
             ))}
           </div>
         ) : filteredRecipes.length === 0 ? (
-          <div className="w-full text-center py-12 bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-100 dark:border-zinc-800 p-8 flex flex-col items-center gap-3">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
+          <div className="w-full text-center py-12 bg-surface rounded-2xl border border-border p-8 flex flex-col items-center gap-3">
+            <p className="text-sm text-ink-muted font-medium leading-relaxed">
               Tidak ada resep yang cocok dengan kriteria pencarian atau filter Anda.
             </p>
-            <a
+            <Link
               href="/"
-              className="px-4 py-2 rounded-full bg-orange-50 dark:bg-zinc-800 hover:bg-orange-100 dark:hover:bg-zinc-700 text-[#ff6b00] dark:text-orange-400 text-xs font-bold transition-colors"
+              className="px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary/90 text-xs font-bold transition-colors"
             >
               Kembali ke Semua Resep
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
@@ -239,7 +241,7 @@ function HomepageContent() {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans flex flex-col transition-colors">
+    <div className="min-h-screen bg-bg font-sans flex flex-col transition-colors">
       {/* Top Navbar */}
       <Navbar />
 
@@ -249,11 +251,11 @@ export default function Home() {
         <Sidebar />
 
         {/* Scrollable Page Body */}
-        <main className="flex-1 min-w-0 md:pl-[175px] px-6 md:px-8 bg-zinc-50/50 dark:bg-zinc-950/50">
+        <main className="flex-1 min-w-0 md:pl-[175px] px-6 md:px-8 bg-bg">
           <Suspense
             fallback={
               <div className="w-full flex items-center justify-center py-24">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ff6b00]" />
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
               </div>
             }
           >
