@@ -72,7 +72,8 @@ export default function Sidebar() {
           const { data: dbRecipes, error: dbRecipesError } = await supabase
             .from('recipes_db')
             .select('*')
-            .in('id', favRecipeIds);
+            .in('id', favRecipeIds)
+            .eq('status', 'approved');
 
           if (dbRecipesError) {
             console.error('Failed to load DB recipes:', dbRecipesError);

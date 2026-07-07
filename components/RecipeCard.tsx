@@ -28,6 +28,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
             .from('recipes_db')
             .select('id')
             .eq('slug', recipe.slug)
+            .eq('status', 'approved')
             .maybeSingle();
           recipeId = dbRecipe?.id;
         }
@@ -108,6 +109,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
             .from('recipes_db')
             .select('id')
             .eq('slug', recipe.slug)
+            .eq('status', 'approved')
             .maybeSingle();
 
           if (existingRecipe) {

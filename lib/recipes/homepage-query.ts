@@ -80,6 +80,7 @@ export async function fetchHomepageRecipes(
   let query = supabase
     .from('recipes_db')
     .select('*', { count: 'exact' })
+    .eq('status', 'approved')
     .order('created_at', { ascending: false });
 
   query = applyHomepageFilters(query, filters);

@@ -25,6 +25,7 @@ async function getRecipe(slug: string): Promise<Recipe | null> {
       .from('recipes_db')
       .select('*')
       .eq('slug', slug)
+      .eq('status', 'approved')
       .single();
 
     if (!error && data) {

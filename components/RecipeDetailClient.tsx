@@ -56,6 +56,7 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
             .from('recipes_db')
             .select('id')
             .eq('slug', recipe.slug)
+            .eq('status', 'approved')
             .maybeSingle();
           recipeId = dbRecipe?.id;
         }
@@ -106,6 +107,7 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
             .from('recipes_db')
             .select('id')
             .eq('slug', recipe.slug)
+            .eq('status', 'approved')
             .maybeSingle();
           recipeId = dbRecipe?.id;
         }
@@ -134,6 +136,7 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
             .from('recipes_db')
             .select('id')
             .eq('slug', recipe.slug)
+            .eq('status', 'approved')
             .maybeSingle();
             
           if (existingRecipe) {
