@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
@@ -18,9 +18,26 @@ import {
 } from 'lucide-react';
 
 export default function WriteRecipePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    }>
+      <WriteRecipeForm />
+    </Suspense>
+  );
+}
+
+function WriteRecipeForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editSlug = searchParams.get('edit');
+  
   const [user, setUser] = useState<any>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [recipeIdToEdit, setRecipeIdToEdit] = useState<number | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const supabase = createClient();
 
   // Form states
@@ -34,6 +51,8 @@ export default function WriteRecipePage() {
   const [imageUrl, setImageUrl] = useState('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80');
   const [ingredients, setIngredients] = useState<string[]>(['']);
   const [steps, setSteps] = useState<string[]>(['']);
+
+  const [authorName, setAuthorName] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -49,12 +68,70 @@ export default function WriteRecipePage() {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      setUser(currentUser);
+      if (currentUser) {
+        // Fetch display_name from profiles
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('id', currentUser.id)
+          .maybeSingle();
+        if (profile?.display_name) {
+          setAuthorName(profile.display_name);
+        } else {
+          // Fallback to email username if display_name is not set
+          setAuthorName(currentUser.email?.split('@')[0] || '');
+        }
+      }
       setCheckingAuth(false);
     };
     checkUser();
   }, [supabase]);
+
+  useEffect(() => {
+    const fetchRecipeToEdit = async () => {
+      if (!editSlug || !user) return;
+      const { data: recipe, error } = await supabase
+        .from('recipes_db')
+        .select('*')
+        .eq('slug', editSlug)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching recipe to edit:', error.message);
+        return;
+      }
+
+      if (recipe) {
+        // Verify owner match
+        if (recipe.user_id !== user.id) {
+          setErrorMsg('Anda bukan pemilik resep ini.');
+          return;
+        }
+
+        setRecipeIdToEdit(Number(recipe.id));
+        setIsEditMode(true);
+        setTitle(recipe.title);
+        setDescription(recipe.description);
+        setRegion(recipe.region || 'Jawa');
+        setDifficulty(recipe.difficulty as any || 'mudah');
+        setPrepTime(recipe.prep_time || 15);
+        setCookTime(recipe.cook_time || 20);
+        setServings(recipe.servings || 2);
+        setImageUrl(recipe.image_url);
+        setIngredients(recipe.ingredients || ['']);
+        setSteps(recipe.steps || ['']);
+        if (recipe.author_name) {
+          setAuthorName(recipe.author_name);
+        }
+      }
+    };
+
+    if (user && editSlug) {
+      fetchRecipeToEdit();
+    }
+  }, [user, editSlug, supabase]);
 
   const addIngredient = () => setIngredients([...ingredients, '']);
   const removeIngredient = (index: number) => {
@@ -126,41 +203,79 @@ export default function WriteRecipePage() {
         steps: steps.map((s) => s.trim()),
         is_popular: false,
         difficulty,
-        user_id: currentUser?.id || null
+        user_id: currentUser?.id || null,
+        author_name: authorName.trim() || null,
+        status: currentUser ? 'pending' : 'approved' // Locally saved ones can remain immediately approved/accessible
       };
 
       // If user is authenticated, we write to Supabase recipes_db table.
-      // If not, we will save to localStorage as a custom recipe, and redirect! This keeps the UI fully functional even for unauthenticated users checking the app out!
       if (currentUser) {
-        const { data, error } = await supabase
-          .from('recipes_db')
-          .insert([recipeData])
-          .select();
+        if (isEditMode && recipeIdToEdit) {
+          const changeRequest = {
+            recipe_id: recipeIdToEdit,
+            requested_by: currentUser.id,
+            type: 'edit',
+            proposed_data: {
+              title: title.trim(),
+              slug: editSlug, // preserve original slug in proposed data
+              description: description.trim() || `Resep khas ${region} yang lezat dan otentik.`,
+              image_url: imageUrl,
+              region,
+              prep_time: Number(prepTime),
+              cook_time: Number(cookTime),
+              servings: Number(servings),
+              ingredients: ingredients.map((i) => i.trim()),
+              steps: steps.map((s) => s.trim()),
+              difficulty,
+              author_name: authorName.trim() || null
+            },
+            status: 'pending'
+          };
 
-        if (error) {
-          throw new Error(error.message);
-        }
+          const { error } = await supabase
+            .from('recipe_change_requests')
+            .insert([changeRequest]);
 
-        // Auto-favorite the created recipe so it appears in "Koleksi Saya" in Sidebar
-        if (data && data[0]) {
-          const newRecipeId = Number(data[0].id);
-          const { error: favError } = await supabase
-            .from('favorites')
-            .insert([{ user_id: currentUser.id, recipe_id: newRecipeId }]);
-
-          if (favError) {
-            console.error('Failed to auto-favorite created recipe:', favError);
-          } else {
-            // Dispatch a custom event to notify Sidebar
-            window.dispatchEvent(new Event('favorites-updated'));
+          if (error) {
+            throw new Error(error.message);
           }
-        }
 
-        setSuccessMsg('Resep berhasil dipublikasikan!');
-        setTimeout(() => {
-          router.push(`/recipes/${finalSlug}`);
-          router.refresh();
-        }, 1500);
+          setSuccessMsg('Usulan perubahan resep berhasil dikirim! Sedang menunggu peninjauan oleh admin.');
+          setTimeout(() => {
+            router.push(`/recipes/${editSlug}`);
+            router.refresh();
+          }, 3000);
+        } else {
+          const { data, error } = await supabase
+            .from('recipes_db')
+            .insert([recipeData])
+            .select();
+
+          if (error) {
+            throw new Error(error.message);
+          }
+
+          // Auto-favorite the created recipe so it appears in "Koleksi Saya" in Sidebar
+          if (data && data[0]) {
+            const newRecipeId = Number(data[0].id);
+            const { error: favError } = await supabase
+              .from('favorites')
+              .insert([{ user_id: currentUser.id, recipe_id: newRecipeId }]);
+
+            if (favError) {
+              console.error('Failed to auto-favorite created recipe:', favError);
+            } else {
+              // Dispatch a custom event to notify Sidebar
+              window.dispatchEvent(new Event('favorites-updated'));
+            }
+          }
+
+          setSuccessMsg('Resep berhasil dikirim! Resep Anda sedang menunggu peninjauan oleh admin sebelum dipublikasikan.');
+          setTimeout(() => {
+            router.push(`/recipes/${finalSlug}`);
+            router.refresh();
+          }, 3000);
+        }
       } else {
         // Unauthenticated local save fallback
         const localRecipes = JSON.parse(localStorage.getItem('enaknyo_local_recipes') || '[]');
@@ -209,10 +324,12 @@ export default function WriteRecipePage() {
                   className="text-2xl font-semibold text-ink leading-tight"
                   style={{ fontFamily: "'Fraunces', serif" }}
                 >
-                  Tulis Resep Baru
+                  {isEditMode ? 'Edit Resep' : 'Tulis Resep Baru'}
                 </h1>
                 <p className="text-xs text-ink-muted">
-                  Bagikan warisan kuliner Anda dengan ribuan pencinta rasa Nusantara.
+                  {isEditMode 
+                    ? 'Ajukan usulan perubahan resep Anda untuk ditinjau oleh admin.' 
+                    : 'Bagikan warisan kuliner Anda dengan ribuan pencinta rasa Nusantara.'}
                 </p>
               </div>
 
@@ -260,6 +377,17 @@ export default function WriteRecipePage() {
                       placeholder="Contoh: Soto Betawi Asli Daging Sapi"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
+                      className="w-full h-11 px-4 rounded-xl border border-border text-sm focus:outline-none focus:border-primary bg-bg text-ink"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-ink-muted">Nama Penulis</label>
+                    <input
+                      type="text"
+                      placeholder="Nama Anda yang akan ditampilkan di resep..."
+                      value={authorName}
+                      onChange={(e) => setAuthorName(e.target.value)}
                       className="w-full h-11 px-4 rounded-xl border border-border text-sm focus:outline-none focus:border-primary bg-bg text-ink"
                     />
                   </div>
@@ -467,7 +595,7 @@ export default function WriteRecipePage() {
                   disabled={loading}
                   className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 disabled:bg-surface-muted disabled:text-ink-muted text-white font-bold text-sm transition-all active:scale-[0.98] cursor-pointer"
                 >
-                  {loading ? 'Menyimpan...' : 'Terbitkan Resep'}
+                  {loading ? 'Menyimpan...' : (isEditMode ? 'Kirim Usulan Perubahan' : 'Terbitkan Resep')}
                 </button>
               </form>
             </div>

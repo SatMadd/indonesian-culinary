@@ -49,8 +49,8 @@ async function test() {
         
         console.log('Inserting recipe with authenticated client...');
         const testRecipe = {
-          title: 'Soto Ayam',
-          slug: `soto-ayam-${Math.floor(Math.random()*1000)}`,
+          title: 'Soto Ayam Test RLS',
+          slug: `soto-ayam-test-${Math.floor(Math.random()*10000)}`,
           description: 'Soto ayam khas Jawa yang gurih.',
           image_url: 'https://images.unsplash.com/photo-1541832676-9b763b0239ab',
           region: 'Jawa',
@@ -60,7 +60,8 @@ async function test() {
           ingredients: ['1/2 ekor ayam', '1.5 liter air'],
           steps: ['Rebus ayam.', 'Sajikan.'],
           is_popular: true,
-          difficulty: 'mudah'
+          difficulty: 'mudah',
+          user_id: session.user.id
         };
 
         const { data: insertData, error: insertError } = await authSupabase.from('recipes_db').insert([testRecipe]).select();
@@ -68,6 +69,15 @@ async function test() {
           console.error('Error inserting recipe:', insertError);
         } else {
           console.log('Successfully inserted recipe:', insertData);
+          console.log('Status of inserted recipe:', insertData[0].status); // should be 'pending'
+        }
+
+        console.log('Querying my profile to check if trigger worked...');
+        const { data: profileData, error: profileError } = await authSupabase.from('profiles').select('*');
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
+        } else {
+          console.log('Profile details:', profileData);
         }
         break;
       }

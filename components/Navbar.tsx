@@ -117,7 +117,7 @@ export default function Navbar() {
         <button
           onClick={cycleTheme}
           className="p-2 text-ink-muted hover:text-primary hover:bg-surface-muted rounded-xl transition-all cursor-pointer"
-          title={getThemeTitle()}
+          title={mounted ? getThemeTitle() : 'Ubah Tema'}
           aria-label="Toggle Theme"
         >
           {renderThemeIcon()}

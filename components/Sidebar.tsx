@@ -117,6 +117,21 @@ export default function Sidebar() {
         <ChevronRight className="w-4 h-4 text-border group-hover:text-primary transition-transform group-hover:translate-x-0.5" />
       </Link>
 
+      {user && (
+        <Link
+          href="/my-recipes"
+          className="flex items-center justify-between text-ink hover:text-primary transition-colors group"
+        >
+          <div className="flex items-center gap-2">
+            <BookMarked className="w-4 h-4 text-ink-muted group-hover:text-primary" />
+            <span className="text-xs font-semibold uppercase tracking-wider">
+              Resep Saya
+            </span>
+          </div>
+          <ChevronRight className="w-4 h-4 text-border group-hover:text-primary transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      )}
+
       <div className="h-[1px] bg-border my-1" />
 
       {/* Collection Section */}

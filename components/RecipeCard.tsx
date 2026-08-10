@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 import { Heart, Clock, BarChart } from 'lucide-react';
 import { Recipe } from '@/types';
+import { seedFallbackRecipe } from '@/app/actions/seed-fallback-recipe';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -115,18 +116,14 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
           if (existingRecipe) {
             recipeId = existingRecipe.id;
           } else {
-            // Seed the fallback recipe to database so it has a bigint id
+            // Seed the fallback recipe via a trusted server action (service role, bypasses RLS)
             const { id, created_at, ...recipeData } = recipe;
-            const { data: newRecipe, error: insertError } = await supabase
-              .from('recipes_db')
-              .insert([recipeData])
-              .select('id')
-              .single();
+            const seeded = await seedFallbackRecipe(recipeData);
 
-            if (!insertError && newRecipe) {
-              recipeId = newRecipe.id;
+            if (seeded) {
+              recipeId = seeded.id;
             } else {
-              console.error('Failed to seed fallback recipe to DB:', insertError);
+              console.error('Failed to seed fallback recipe to DB');
               setErrorMsg('Gagal menyimpan');
               setTimeout(() => setErrorMsg(''), 3000);
               return;

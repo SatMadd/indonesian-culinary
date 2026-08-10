@@ -12,9 +12,12 @@ import {
   ChefHat,
   ArrowLeft,
   CheckCircle,
-  Play
+  Play,
+  Edit,
+  Trash2
 } from 'lucide-react';
 import { Recipe } from '@/types';
+import { seedFallbackRecipe } from '@/app/actions/seed-fallback-recipe';
 
 interface RecipeDetailClientProps {
   recipe: Recipe | null;
@@ -29,7 +32,65 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
   const [errorMsg, setErrorMsg] = useState('');
   const [checkedIngredients, setCheckedIngredients] = useState<number[]>([]);
   const [activeStep, setActiveStep] = useState<number>(-1);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isOwner, setIsOwner] = useState(false);
+  const [changeRequestStatus, setChangeRequestStatus] = useState<any>(null);
   const supabase = createClient();
+
+  useEffect(() => {
+    const fetchUserAndStatus = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
+      if (user && recipe) {
+        setIsOwner(recipe.user_id === user.id);
+        
+        // Fetch any pending change requests for this recipe
+        const { data: changeReqs } = await supabase
+          .from('recipe_change_requests')
+          .select('*')
+          .eq('recipe_id', recipe.id)
+          .eq('status', 'pending')
+          .maybeSingle();
+        if (changeReqs) {
+          setChangeRequestStatus(changeReqs);
+        }
+      }
+    };
+    fetchUserAndStatus();
+  }, [recipe, supabase]);
+
+  const handleDeleteRecipe = async () => {
+    if (!recipe || !currentUser) return;
+    if (!confirm('Apakah Anda yakin ingin mengajukan penghapusan resep ini?')) return;
+    
+    setErrorMsg('');
+    const { error } = await supabase
+      .from('recipe_change_requests')
+      .insert([{
+        recipe_id: recipe.id,
+        requested_by: currentUser.id,
+        type: 'delete',
+        proposed_data: null,
+        status: 'pending'
+      }]);
+
+    if (error) {
+      setErrorMsg('Gagal mengirim usulan penghapusan: ' + error.message);
+    } else {
+      alert('Usulan penghapusan resep berhasil dikirim dan sedang menunggu peninjauan admin.');
+      router.refresh();
+      // Fetch status again
+      const { data: changeReqs } = await supabase
+        .from('recipe_change_requests')
+        .select('*')
+        .eq('recipe_id', recipe.id)
+        .eq('status', 'pending')
+        .maybeSingle();
+      if (changeReqs) {
+        setChangeRequestStatus(changeReqs);
+      }
+    }
+  };
 
   useEffect(() => {
     if (!recipe && slug) {
@@ -142,18 +203,14 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
           if (existingRecipe) {
             recipeId = existingRecipe.id;
           } else {
-            // Seed the fallback recipe to database so it has a bigint id
+            // Seed the fallback recipe via a trusted server action (service role, bypasses RLS)
             const { id, created_at, ...recipeData } = recipe;
-            const { data: newRecipe, error: insertError } = await supabase
-              .from('recipes_db')
-              .insert([recipeData])
-              .select('id')
-              .single();
+            const seeded = await seedFallbackRecipe(recipeData);
               
-            if (!insertError && newRecipe) {
-              recipeId = newRecipe.id;
+            if (seeded) {
+              recipeId = seeded.id;
             } else {
-              console.error('Failed to seed fallback recipe to DB:', insertError);
+              console.error('Failed to seed fallback recipe to DB');
               setErrorMsg('Gagal menyimpan');
               setTimeout(() => setErrorMsg(''), 3000);
               return;
@@ -321,6 +378,66 @@ export default function RecipeDetailClient({ recipe: initialRecipe, slug }: Reci
 
         {/* Right Column: Recipe details (7 cols) */}
         <div className="lg:col-span-7 flex flex-col gap-6 bg-surface p-6 md:p-8 rounded-xl border border-border transition-colors">
+          {/* Owner Moderation Banner */}
+          {isOwner && (
+            <div className="p-4 rounded-xl border border-border bg-surface-muted flex flex-col gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <span className="text-xs font-bold text-ink-muted">Kelola Resep Anda:</span>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/write?edit=${recipe.slug}`}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border hover:border-primary hover:text-primary text-xs font-bold transition-all bg-surface cursor-pointer text-ink-muted"
+                  >
+                    <Edit className="w-3.5 h-3.5" />
+                    <span>Edit Resep</span>
+                  </Link>
+                  <button
+                    onClick={handleDeleteRecipe}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border hover:border-accent hover:text-accent text-xs font-bold transition-all bg-surface cursor-pointer text-ink-muted"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Hapus Resep</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Status Badge */}
+              <div className="flex flex-col gap-1.5 border-t border-border pt-3 mt-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-ink-muted">Status Resep:</span>
+                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                    recipe.status === 'approved' ? 'bg-primary/10 text-primary border border-primary/20' :
+                    recipe.status === 'rejected' ? 'bg-accent/10 text-accent border border-accent/20' :
+                    'bg-secondary/10 text-secondary border border-secondary/20'
+                  }`}>
+                    {recipe.status === 'approved' ? 'Disetujui / Publik' :
+                     recipe.status === 'rejected' ? 'Ditolak' : 'Menunggu Peninjauan'}
+                  </span>
+                </div>
+                {recipe.status === 'rejected' && recipe.rejection_reason && (
+                  <p className="text-xs text-accent font-semibold">
+                    Alasan Penolakan: <span className="font-normal text-ink-muted">{recipe.rejection_reason}</span>
+                  </p>
+                )}
+
+                {/* Change Request Status Banner */}
+                {changeRequestStatus && (
+                  <div className="mt-2 p-2.5 rounded-lg border border-secondary/20 bg-secondary/5 flex flex-col gap-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
+                      <span className="text-[11px] font-bold text-secondary uppercase tracking-wider">
+                        Ada usulan {changeRequestStatus.type === 'edit' ? 'perubahan' : 'penghapusan'} pending
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-ink-muted">
+                      Usulan dikirim pada {new Date(changeRequestStatus.created_at).toLocaleDateString('id-ID')}. Sedang menunggu peninjauan admin.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Header */}
           <div className="flex flex-col gap-2">
             <span className="px-2.5 py-1 rounded-xl bg-surface-muted text-secondary text-[10px] font-extrabold uppercase tracking-wide self-start border border-border">
