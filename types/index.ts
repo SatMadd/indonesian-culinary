@@ -13,7 +13,12 @@ export interface Recipe {
   steps: string[];
   is_popular: boolean;
   difficulty: 'mudah' | 'sedang' | 'sulit';
-  user_id?: string;
+  user_id?: string | null;
+  status?: 'pending' | 'approved' | 'rejected';
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  rejection_reason?: string | null;
+  author_name?: string | null;
 }
 
 export interface Favorite {
