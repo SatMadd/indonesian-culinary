@@ -63,7 +63,7 @@ function WriteRecipeForm() {
     { name: 'Nusantara Mix', url: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop&q=80' },
     { name: 'Sate & Bakaran', url: 'https://images.unsplash.com/photo-1529042410759-befb1204b468?w=800&auto=format&fit=crop&q=80' },
     { name: 'Soto & Kuah', url: 'https://images.unsplash.com/photo-1541832676-9b763b0239ab?w=800&auto=format&fit=crop&q=80' },
-    { name: 'Nasi Goreng', url: 'https://images.unsplash.com/photo-1617692518154-15697f288849?w=800&auto=format&fit=crop&q=80' }
+    { name: 'Nasi Goreng', url: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=800&auto=format&fit=crop&q=80' }
   ];
 
   useEffect(() => {

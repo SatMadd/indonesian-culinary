@@ -35,7 +35,7 @@ export const FALLBACK_RECIPES: Recipe[] = [
     title: 'Ayam Kecap',
     slug: 'ayam-kecap',
     description: 'Ayam kecap manis gurih dengan saus kental yang meresap sempurna, cocok untuk menu harian keluarga.',
-    image_url: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=800&auto=format&fit=crop&q=80',
+    image_url: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=800&auto=format&fit=crop&q=80',
     region: 'Sunda',
     prep_time: 15,
     cook_time: 25,
