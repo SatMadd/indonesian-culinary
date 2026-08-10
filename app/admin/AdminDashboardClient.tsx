@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { approveRecipe, rejectRecipe, approveChangeRequest, rejectChangeRequest } from './actions';
-import { ChefHat, AlertCircle, Sparkles, BookOpen, Clock, BarChart, User } from 'lucide-react';
+import { ChefHat, AlertCircle, Sparkles, BookOpen, Clock, BarChart, User, Loader2 } from 'lucide-react';
 
 interface AdminDashboardClientProps {
   pendingRecipes: any[];
@@ -27,8 +27,11 @@ export default function AdminDashboardClient({
   const [requestReason, setRequestReason] = useState('');
   
   const [actionError, setActionError] = useState('');
+  const [pendingActionId, setPendingActionId] = useState<string | null>(null);
 
   const handleApproveRecipe = async (id: number) => {
+    if (pendingActionId) return;
+    setPendingActionId(`recipe-approve-${id}`);
     setActionError('');
     const res = await approveRecipe(id);
     if (res.error) {
@@ -36,11 +39,13 @@ export default function AdminDashboardClient({
     } else {
       setRecipes(recipes.filter(r => r.id !== id));
     }
+    setPendingActionId(null);
   };
 
   const handleRejectRecipeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!recipeRejectId || !recipeReason.trim()) return;
+    if (!recipeRejectId || !recipeReason.trim() || pendingActionId) return;
+    setPendingActionId(`recipe-reject-${recipeRejectId}`);
     setActionError('');
 
     const res = await rejectRecipe(recipeRejectId, recipeReason);
@@ -51,9 +56,12 @@ export default function AdminDashboardClient({
       setRecipeRejectId(null);
       setRecipeReason('');
     }
+    setPendingActionId(null);
   };
 
   const handleApproveRequest = async (id: number) => {
+    if (pendingActionId) return;
+    setPendingActionId(`request-approve-${id}`);
     setActionError('');
     const res = await approveChangeRequest(id);
     if (res.error) {
@@ -61,11 +69,13 @@ export default function AdminDashboardClient({
     } else {
       setRequests(requests.filter(r => r.id !== id));
     }
+    setPendingActionId(null);
   };
 
   const handleRejectRequestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!requestRejectId || !requestReason.trim()) return;
+    if (!requestRejectId || !requestReason.trim() || pendingActionId) return;
+    setPendingActionId(`request-reject-${requestRejectId}`);
     setActionError('');
 
     const res = await rejectChangeRequest(requestRejectId, requestReason);
@@ -76,6 +86,7 @@ export default function AdminDashboardClient({
       setRequestRejectId(null);
       setRequestReason('');
     }
+    setPendingActionId(null);
   };
 
   function RecipeDiff({ current, proposed }: { current: any; proposed: any }) {
@@ -188,13 +199,16 @@ export default function AdminDashboardClient({
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleApproveRecipe(recipe.id)}
-                        className="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary/95 text-white text-xs font-bold transition-all cursor-pointer"
+                        disabled={!!pendingActionId}
+                        className="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary/95 text-white text-xs font-bold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
                       >
-                        Setujui
+                        {pendingActionId === `recipe-approve-${recipe.id}` && <Loader2 className="w-3 h-3 animate-spin" />}
+                        {pendingActionId === `recipe-approve-${recipe.id}` ? 'Memproses...' : 'Setujui'}
                       </button>
                       <button
                         onClick={() => setRecipeRejectId(recipe.id)}
-                        className="px-3 py-1.5 rounded-xl border border-border hover:border-accent hover:text-accent bg-surface text-xs font-bold text-ink-muted transition-all cursor-pointer"
+                        disabled={!!pendingActionId}
+                        className="px-3 py-1.5 rounded-xl border border-border hover:border-accent hover:text-accent bg-surface text-xs font-bold text-ink-muted transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Tolak
                       </button>
@@ -265,9 +279,11 @@ export default function AdminDashboardClient({
                     <div className="flex items-center gap-2 self-end">
                       <button
                         type="submit"
-                        className="px-3 py-1.5 rounded-xl bg-accent hover:bg-accent/95 text-white text-xs font-bold transition-all cursor-pointer"
+                        disabled={!!pendingActionId}
+                        className="px-3 py-1.5 rounded-xl bg-accent hover:bg-accent/95 text-white text-xs font-bold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
                       >
-                        Kirim Penolakan
+                        {pendingActionId?.startsWith('recipe-reject-') && <Loader2 className="w-3 h-3 animate-spin" />}
+                        {pendingActionId?.startsWith('recipe-reject-') ? 'Memproses...' : 'Kirim Penolakan'}
                       </button>
                       <button
                         type="button"
@@ -320,13 +336,16 @@ export default function AdminDashboardClient({
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleApproveRequest(req.id)}
-                        className="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary/95 text-white text-xs font-bold transition-all cursor-pointer"
+                        disabled={!!pendingActionId}
+                        className="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary/95 text-white text-xs font-bold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
                       >
-                        Setujui
+                        {pendingActionId === `request-approve-${req.id}` && <Loader2 className="w-3 h-3 animate-spin" />}
+                        {pendingActionId === `request-approve-${req.id}` ? 'Memproses...' : 'Setujui'}
                       </button>
                       <button
                         onClick={() => setRequestRejectId(req.id)}
-                        className="px-3 py-1.5 rounded-xl border border-border hover:border-accent hover:text-accent bg-surface text-xs font-bold text-ink-muted transition-all cursor-pointer"
+                        disabled={!!pendingActionId}
+                        className="px-3 py-1.5 rounded-xl border border-border hover:border-accent hover:text-accent bg-surface text-xs font-bold text-ink-muted transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Tolak
                       </button>
@@ -367,9 +386,11 @@ export default function AdminDashboardClient({
                     <div className="flex items-center gap-2 self-end">
                       <button
                         type="submit"
-                        className="px-3 py-1.5 rounded-xl bg-accent hover:bg-accent/95 text-white text-xs font-bold transition-all cursor-pointer"
+                        disabled={!!pendingActionId}
+                        className="px-3 py-1.5 rounded-xl bg-accent hover:bg-accent/95 text-white text-xs font-bold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
                       >
-                        Kirim Penolakan
+                        {pendingActionId?.startsWith('request-reject-') && <Loader2 className="w-3 h-3 animate-spin" />}
+                        {pendingActionId?.startsWith('request-reject-') ? 'Memproses...' : 'Kirim Penolakan'}
                       </button>
                       <button
                         type="button"
